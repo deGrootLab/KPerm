@@ -1,0 +1,11 @@
+=================================
+Total time: 5.000000 ns
+dt: 0.020000 ns
+Number of K+: 148
+Number of water: 7272
+Number of net water permeation events = 0
+Number of net ion permeation events = 5
+Current = 160.20000 pA
+Results saved to /home/clam/projects/Markov/softs/KPerm/tutorials/charge-scaling/traj-1/kperm.csv
+Log saved to /home/clam/projects/Markov/softs/KPerm/tutorials/charge-scaling/traj-1/kperm.log
+=================================
