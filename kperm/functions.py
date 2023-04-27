@@ -1107,6 +1107,9 @@ class Channel:
         else:
             raise ValueError("paths invalid.")
         return mfpt, hittingTimes
+    
+    def plotNetFlux(self, weight_threshold=0.1, save=None, returnGraphData=False):
+        return plotNetFlux(self.occupancy_6_all, weight_threshold, save=save, returnGraphData=returnGraphData)
 
 @countTime
 def run(coor, traj, output="kperm", sf_idx=None, SFScanAllRes=False, CADistance=False, 

@@ -522,7 +522,7 @@ def computeTransProb(trajs, return_matrix=False, quiet=False):
                         print(f"{state_j:<10}\t{p:<12.5%} ± {err:<12.5%} {n}")
 
     if return_matrix:
-        return trans_prob, state_to_idx, idx_to_state
+        return trans_prob_dict, trans_prob, state_to_idx, idx_to_state
     else:
         return trans_prob_dict
 
@@ -825,3 +825,85 @@ def permeationMFPT(occupancy_all, jumps_all, pairs, n_bs_jump=4, dt=.02, backwar
                       columns=["initial","final", "mean (ns)", "low (ns)",
                                "high (ns)", "n", "k_f", "w_f"])
     return df, hts_output
+
+def plotNetFlux(occupancy_all, weight_threshold=0.1, save=None, returnGraphData=False):
+    """ plot net fluxes
+
+    Parameters
+    ----------
+    occupancy_all: list of arrays of size N
+        all tranjectories expressed in the form of SF occupancy
+
+    weight_threshold: float
+        edges with weight less than 0.2 * maximium of the edge weight are not shown
+
+    save: str
+        if save is not None, then the plot will be saved to the location specified in save.
+
+    Returns
+    -------
+
+    edges_weights_full_positive: dict
+        key: tuple of str
+            (source state, target state)
+            value: float
+                unnormalized net flux from source state to target state
+
+    states_probs_full: dict
+        key: str
+            state
+
+        value: float
+            steady-state distribution between 0 and 1
+
+    """
+
+    node_size_multiplier = 1000
+ 
+    prob_dict, prob_matrix, s2i, i2s = computeTransProb(occupancy_all, return_matrix=True, 
+                                                        quiet=True)
+    n_states = len(prob_matrix)
+    state_probs = np.array([prob_dict[i2s[i]]['prob'] for i in range(n_states)])
+    netflux = np.diag(state_probs) @ prob_matrix - (np.diag(state_probs) @ prob_matrix).T
+
+    edges_weights_full = {}
+    for s1, w1 in s2i.items():
+        for s2, w2 in s2i.items():
+            edges_weights_full[(s1, s2)] = netflux[w1, w2]
+            
+    edges_weights_full_positive = {(s1, s2):w for (s1, s2), w in edges_weights_full.items() if w > 0.0}
+
+    states_probs_full = {i2s[i]:prob_dict[i2s[i]]['prob'] for i in range(n_states)}
+
+
+    DG = nx.DiGraph()
+
+    # edges normalized by the maximal net flux
+    # and edges with weight < threshold are discarded
+    max_weight = max(edges_weights_full_positive.values())
+    edges_weights_trunc_norm= [(s1, s2, w/max_weight) for ((s1, s2), w) in edges_weights_full_positive.items()
+                            if w/max_weight > weight_threshold]
+    DG.add_weighted_edges_from(edges_weights_trunc_norm)
+
+    # nodes, size scales and is normalized by steady-state distribution
+    pos = nx.circular_layout(DG)
+    node_size = np.array([states_probs_full[s] for s in DG.nodes])
+    node_size = node_size / max(node_size) * node_size_multiplier
+
+    # draw
+    _ = nx.draw_networkx_nodes(DG, pos, node_color='orange', 
+                            linewidths=0, node_size=node_size, alpha=0.2)
+    _ = nx.draw_networkx_labels(DG,pos)
+    _ = nx.draw_networkx_edges(DG, pos, min_source_margin=20, min_target_margin=20,
+                            edgelist=list(edges_weights_trunc_norm),
+                            alpha=[e[-1] for e in edges_weights_trunc_norm])
+
+
+
+    if save is not None:
+        _ = plt.savefig(save, dpi=300)
+        print(f"saved as {save}")
+    _ = plt.show()
+
+    if returnGraphData:
+        return states_probs_full, edges_weights_full_positive
