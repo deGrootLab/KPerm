@@ -1,3 +1,2 @@
-from .functions import *
+from .channel import *
 from .permeation import *
-from .markov import *

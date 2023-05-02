@@ -6,141 +6,6 @@ import pandas as pd
 import networkx as nx
 import matplotlib.pyplot as plt
 
-class Channel_old:
-    def __init__(self):
-        self.occupancy_4_all = []
-        self.occupancy_6_all = []
-        self.jumps_all = []
-        self.jumps_4_all = []
-        self.jumps_6_all = []
-        self.dts = None
-        self.dt = None
-        self.currents = None
-        self.current = None
-        self.total_times = None
-
-def loadResults(results_loc):
-    """
-    Parameters
-    ----------
-    results_loc: list of strings
-        directories in which the results (results.csv and results.log) are stored
-
-    Returns
-    -------
-    channel: object
-        info about the channel, defined by the class Channel
-
-    """
-    jumps_all = []
-    occupancy_4_all = []
-    occupancy_6_all = []
-    total_times = []
-    dts = []
-    currents = []
-
-
-    for loc in results_loc:
-        data_loc = os.path.join(loc, 'results.csv')
-        df = pd.read_csv(data_loc, index_col=0)
-        occ = df['occupancy'].to_numpy().astype(str)
-        jumps = df[['j_k', 'j_w']].to_numpy().astype(int)
-
-        occupancy_6_all.append(occ)
-        occ_4 = np.array([s[1:-1] for s in occ])
-        occupancy_4_all.append(occ_4)
-        jumps_all.append(jumps)
-
-        log_loc = os.path.join(loc, 'results.log')
-        with open(log_loc, 'r') as f:
-            log = f.read()
-        total_time = float(re.search(r'Total time\D+(\d+\.\d+)', log).group(1))
-        dt = float(re.search(r'dt\D+(\d+\.\d+)', log).group(1))
-        current = float(re.search(r'Current\D+(\d+\.\d+)', log).group(1))
-        total_times.append(total_time)
-        dts.append(dt)
-        currents.append(current)
-    channel = Channel_old()
-    channel.occupancy_4_all = occupancy_4_all
-    channel.occupancy_6_all = occupancy_6_all
-    channel.jumps_all = jumps_all
-    channel.total_times = np.array(total_times)
-    channel.dts = np.array(dts)
-    channel.currents = np.array(currents)
-
-    return channel
-
-def computeStats(channel, save=''):
-    """
-    Parameters
-    ----------
-    channel: object
-        info about the channel, defined by the class Channel
-        
-    save: string
-        save stats to the location specified
-
-    Returns
-    -------
-    stats: Pandas dataframe
-        store statistics of trajectories, such as total time, lag time, current
-        and occupation state populations
-
-    states: Pandas dataframe
-        point estimate and bootstrap confidence interval for occupation states
-    """
-    
-    try:
-        current_bs = scipy.stats.bootstrap((channel.currents,), np.mean, confidence_level=.95, n_resamples=10000, method='BCa')
-        current_bs_l, current_bs_h = current_bs.confidence_interval
-        channel.current = (np.mean(channel.currents), current_bs_l, current_bs_h)
-        print(f"Current (pA): {channel.current[0]:.3f}\t{current_bs_l:.3f} - {current_bs_h:.3f}\n")
-    except:
-        channel.current = (np.mean(channel.currents), np.mean(channel.currents), np.mean(channel.currents))
-        print(f"Current (pA): {channel.current[0]:.3f}\n")
-
-
-    states, counts = np.unique(np.concatenate(channel.occupancy_6_all), return_counts=True)
-    sort_idx = np.argsort(counts)[::-1]
-    states = states[sort_idx]
-    population = counts[sort_idx] / np.sum(counts)
-
-    stats_dict = {'T (ns)':channel.total_times,
-                  'dt (ns)':channel.dts,
-                  'current (pA)':channel.currents}
-
-    states_dict = {}
-    states_dict['state'] = states
-    states_dict['p_mean'] = population
-
-    p_ls = []
-    p_hs = []
-
-    for s, p_mean in zip(states, population):
-        ps = np.array([np.mean(occupancy == s) for occupancy in channel.occupancy_6_all])
-        stats_dict[s] = ps
-        try:
-            p_bs = scipy.stats.bootstrap((ps,), np.mean, confidence_level=.95, n_resamples=10000, method='BCa')
-            p_l, p_h = p_bs.confidence_interval
-            p_ls.append(p_l)
-            p_hs.append(p_h)
-        except:
-            p_ls.append(p_mean)
-            p_hs.append(p_mean)
-
-    states_dict['p_l'] = p_ls
-    states_dict['p_h'] = p_hs
-
-    stats = pd.DataFrame(stats_dict)
-    states = pd.DataFrame(states_dict)
-    
-    if save:
-        save = os.path.abspath(save)
-        stats.to_csv(save)
-        print(f"Stats saved to {save}")
-    
-    return stats, states
-
 def permeationEventsPartition(occupancy, jump, seedState, n_bs_jump):
     """ partitioning trajectory into permeation events
 
@@ -215,7 +80,6 @@ def permeationEventsPartition(occupancy, jump, seedState, n_bs_jump):
     permeationCycle_indices = np.array(permeationCycle_indices)
 
     return stationaryPhase_indices, permeationCycle_indices
-
 
 def permEventsPartition(occupancy, k_jump, cycle_state, n_bs_jump):
     """ partitioning trajectory into full permeation cycles
@@ -472,8 +336,6 @@ def computeTransProb(trajs, return_matrix=False, quiet=False):
     counts = counts[sort_idx]
     counts_total = np.sum(counts)
 
-#     trans_prob_dict = {state:{"count":count, "prob":count/counts_total} \
-#                        for state, count in zip(states, counts)}
     trans_prob_dict = {state:{} for state in states}
 
     state_to_idx = {s:i for i, s in enumerate(states)}
@@ -486,7 +348,7 @@ def computeTransProb(trajs, return_matrix=False, quiet=False):
         for t in range(len(traj)-1):
             i, j = state_to_idx[traj[t]], state_to_idx[traj[t+1]]
             trans_counts[i,j] += 1
-    # trans_counts[trans_counts < threshold] = 0
+
     trans_prob = np.nan_to_num(np.asarray([trans_counts[i] / (np.sum(trans_counts[i]) or 1.0) for i in range(n_states)]))
 
     n_outward_total = np.sum(trans_counts, axis=1)
@@ -892,7 +754,7 @@ def plotNetFlux(occupancy_all, weight_threshold=0.1, save=None, returnGraphData=
 
     # draw
     _ = nx.draw_networkx_nodes(DG, pos, node_color='orange', 
-                            linewidths=0, node_size=node_size, alpha=0.2)
+                            linewidths=0, node_size=node_size, alpha=0.5)
     _ = nx.draw_networkx_labels(DG,pos)
     _ = nx.draw_networkx_edges(DG, pos, min_source_margin=20, min_target_margin=20,
                             edgelist=list(edges_weights_trunc_norm),

@@ -8,7 +8,6 @@ import sys
 import re
 from scipy.stats import bootstrap
 from functools import wraps
-from .markov import *
 from .permeation import *
 
 def countTime(func):
@@ -297,7 +296,7 @@ def getNonProteinIndex(coor):
 
 def findBound(positions, sol_indices, sf_o_indices, additional_bs_cutoff=4.0,
               BScenter_cutoff=4.0, d_min_outer_cutoff=4.0):
-    """ read soluent (K) or solvent (water) positions and assign their
+    """ read solute (K) or solvent (water) positions and assign their
     (zero-based) indicies to binding sites
 
     Parameters
@@ -325,7 +324,7 @@ def findBound(positions, sol_indices, sf_o_indices, additional_bs_cutoff=4.0,
     -------
     occupancy: list of lists
         # lists = # binding sites
-        each of the lists contains (zero-based) indices of particles occupying the corresponding BS
+        each of the lists contains (zero-based) indices of particles occupying the corresponding BS (S0 to Scav, 6 in total)
 
     """
     bs_layer_o_pos = np.array([positions[indices] for indices in sf_o_indices])
@@ -376,24 +375,6 @@ def findBound(positions, sol_indices, sf_o_indices, additional_bs_cutoff=4.0,
         if sol_bs_i < 0 or sol_bs_i > n_bs - 1:
             continue
 
-        # elif sol_bs_i == 0:
-        #     # s0
-        #     sol_vec = positions[sol_idx] - axis_scav_end
-        #     sol_radial_vec = sol_vec - np.dot(axis, sol_vec) * axis
-        #     r = np.linalg.norm(sol_radial_vec)
-
-        #     #d_above_s1_o = positions[sol_idx][2] - bs_layer_o_pos_z[1] 
-
-
-        #     # check with the upper layer of S1 
-        #     d  = np.linalg.norm(positions[sol_idx] - bs_layer_o_pos[1], axis=1)
-        
-
-        #     # touching one of the SF oxygen is ok
-        #     if r < BScenter_cutoff and np.sum(d < 3.5) > 0: 
-        #         #and d_above_s1_o < 0 and d_above_s1_o > 0:
-        #         occupancy[sol_bs_i].append(sol_idx)
-
         else:
 
             sol_vec = positions[sol_idx] - axis_scav_end
@@ -402,209 +383,8 @@ def findBound(positions, sol_indices, sf_o_indices, additional_bs_cutoff=4.0,
 
             if r < BScenter_cutoff:
                 occupancy[sol_bs_i].append(sol_idx)
-            # bs_center = np.mean(np.vstack(bs_layer_pos[sol_bs_i:sol_bs_i+2]), axis=0)
-            # if np.linalg.norm(positions[sol_idx] - bs_center) < 1.5 * BScenter_cutoff:
-            #    occupancy[sol_bs_i].append(sol_idx)
+
     
-    return occupancy
-
-
-def findBound_old(positions, sol_idx, bs_layer_idx, additional_bs_cutoff=4.0,
-              BScenter_cutoff=4.0, d_min_outer_cutoff=4.0):
-    """ read soluent (K) or solvent (water) positions and assign their
-    (zero-based) indicies to binding sites
-
-    Parameters
-    ----------
-    coor : str
-        The path to the coordinate file containing the system
-    sol_idx : array of int
-        containing zero-based indices of particles such as oxygen of water, K and Cl
-    bs_layer_idx : 2-dimensional array of int
-        containing zero-based indices of atoms of layers (from SF) defining the binding sites
-        e.g.
-            bs_layer_idx[0] contains idx of atoms of layers forming the first boundary of the first binding site
-            bs_layer_idx[1] contains idx of atoms of layers forming the second boundary of the first binding site
-                            + the first boundary of the second binding site
-    additional_bs_cutoff: float
-        cutoff distance (in z-direction) in Angstrom for S0 and Scav
-    BScenter_cutoff: float
-        threshold distance between center of BSs and particle in Angstrom for determining if particle is occupying
-        one of the BSs
-    d_min_outer_cutoff: float
-        threshold distance in Angstrom for determining if the particle is touching and thus occupying
-        outer (the first or the last binding sites) BSs
-
-    Returns
-    -------
-    occupancy: list of lists
-        # lists = # binding sites
-        each of the lists contains (zero-based) indices of particles occupying the corresponding BS
-
-    """
-    # TODO: account for channel moving across period boundary (when channel moves across PB in z-direction)
-
-    bs_layer_pos = np.array([positions[indices] for indices in bs_layer_idx])
-    bs_layer_pos_z = np.mean(bs_layer_pos, axis=1)[:, 2]
-    sol_pos_z = positions[sol_idx][:, 2]
-
-    # check if it is sorted in descending order which is needed
-    # this ensures that first and second indices define the first BS (S0)
-    assert all(np.sort(bs_layer_pos_z)[::-1] == bs_layer_pos_z)
-
-    # adding S0 and Scav boundary
-    bs_full_pos_z = np.array([bs_layer_pos_z[0] + additional_bs_cutoff] +
-                             list(bs_layer_pos_z) +
-                             [bs_layer_pos_z[-1] - additional_bs_cutoff])
-
-    # keep indices and pos_z only for sol within the range of bs_full_pos_z
-    bound_idx = np.argwhere((sol_pos_z < bs_full_pos_z[0]) &
-                          (sol_pos_z > bs_full_pos_z[-1])).reshape(-1)
-    sol_idx = sol_idx[bound_idx]
-    sol_pos_z = sol_pos_z[bound_idx]
-
-
-    # number of binding sites
-    n_bs = len(bs_full_pos_z) - 1
-    # sol_in_bs[i] == 0 when i-th particle, which is unbound, is "above" the first BS (S0)
-    # sol_in_bs[i] == j when i-th particle, which is unbound, is bound by the (j-1)-th BS,
-    #                   for j between 1 and < n_bs
-    # sol_in_bs[i] == n_bs when i-th particle, which is unbound, is "below" the last BS (Scav)
-    sol_in_bs = np.searchsorted(-bs_full_pos_z, -sol_pos_z)
-
-    occupancy = [[] for i in range(n_bs)]
-
-    for idx, i in zip(sol_idx, sol_in_bs):
-        # switching from boundaries to BSs
-        if i < 1 or i > n_bs:
-            continue
-        bs_i = i-1
-
-        if bs_i == 0:
-            # check with lower layer, need at least two SF atoms touching the particle
-            d = np.linalg.norm(positions[idx] - bs_layer_pos[bs_i], axis=1)
-            # touching one of the SF oxygen is ok
-            if np.sum(d < d_min_outer_cutoff) > 0:
-                occupancy[bs_i].append(idx)
-
-        elif bs_i == n_bs-1:
-            # check with the upper layer instead
-            d  = np.linalg.norm(positions[idx] - bs_layer_pos[bs_i-1], axis=1)
-            # touching one of the SF oxygen is ok
-            if np.sum(d < d_min_outer_cutoff) > 0:
-                occupancy[bs_i].append(idx)
-
-        else:
-#             # upper layer
-#             d_u = np.linalg.norm(positions[idx] - bs_layer_pos[bs_i-1], axis=1)
-#             # lower layer
-#             d_l = np.linalg.norm(positions[idx] - bs_layer_pos[bs_i], axis=1)
-#             # need to touch two of them
-#             if np.sum(d_u < d_min_inner_cutoff) + np.sum(d_l < d_min_inner_cutoff) > 1:
-#                 occupancy[bs_i].append(idx)
-
-            bs_center = np.mean(bs_layer_pos[bs_i-1:bs_i+1], axis=1)
-            if np.linalg.norm(positions[idx] - bs_center) < BScenter_cutoff:
-                occupancy[bs_i].append(idx)
-
-
-    return occupancy
-
-
-def findBound_pairwiseComparison_old(positions, sol_idx, bs_layer_idx, additional_bs_cutoff=4.0,
-              d_min_inner_cutoff=4.0, d_min_outer_cutoff=4.0):
-    """ read soluent (K) or solvent (water) positions and assign their
-    (zero-based) indicies to binding sites
-
-    Parameters
-    ----------
-    coor : str
-        The path to the coordinate file containing the system
-    sol_idx : array of int
-        containing zero-based indices of particles such as oxygen of water, K and Cl
-    bs_layer_idx : 2-dimensional array of int
-        containing zero-based indices of atoms of layers (from SF) defining the binding sites
-        e.g.
-            bs_layer_idx[0] contains idx of atoms of layers forming the first boundary of the first binding site
-            bs_layer_idx[1] contains idx of atoms of layers forming the second boundary of the first binding site
-                            + the first boundary of the second binding site
-    additional_bs_cutoff: float
-        cutoff distance (in z-direction) in Angstrom for S0 and Scav
-    d_min_inner_cutoff: float
-        threshold distance in Angstrom for determining if the particle is touching and thus occupying
-        inner (neither the first nor the last binding sites) BSs
-    d_min_outer_cutoff: float
-        threshold distance in Angstrom for determining if the particle is touching and thus occupying
-        outer (the first or the last binding sites) BSs
-
-    Returns
-    -------
-    occupancy: list of lists
-        # lists = # binding sites
-        each of the lists contains (zero-based) indices of particles occupying the corresponding BS
-
-    """
-    # TODO: account for channel moving across period boundary (when channel moves across PB in z-direction)
-
-    bs_layer_pos = np.array([positions[indices] for indices in bs_layer_idx])
-    bs_layer_pos_z = np.mean(bs_layer_pos, axis=1)[:, 2]
-    sol_pos_z = positions[sol_idx][:, 2]
-
-    # check if it is sorted in descending order which is needed
-    # this ensures that first and second indices define the first BS (S0)
-    assert all(np.sort(bs_layer_pos_z)[::-1] == bs_layer_pos_z)
-
-    # adding S0 and Scav boundary
-    bs_full_pos_z = np.array([bs_layer_pos_z[0] + additional_bs_cutoff] +
-                             list(bs_layer_pos_z) +
-                             [bs_layer_pos_z[-1] - additional_bs_cutoff])
-
-    # keep indices and pos_z only for sol within the range of bs_full_pos_z
-    bound_idx = np.argwhere((sol_pos_z < bs_full_pos_z[0]) &
-                          (sol_pos_z > bs_full_pos_z[-1])).reshape(-1)
-    sol_idx = sol_idx[bound_idx]
-    sol_pos_z = sol_pos_z[bound_idx]
-
-
-    # number of binding sites
-    n_bs = len(bs_full_pos_z) - 1
-    # sol_in_bs[i] == 0 when i-th particle, which is unbound, is "above" the first BS (S0)
-    # sol_in_bs[i] == j when i-th particle, which is unbound, is bound by the (j-1)-th BS,
-    #                   for j between 1 and < n_bs
-    # sol_in_bs[i] == n_bs when i-th particle, which is unbound, is "below" the last BS (Scav)
-    sol_in_bs = np.searchsorted(-bs_full_pos_z, -sol_pos_z)
-
-    occupancy = [[] for i in range(n_bs)]
-
-    for idx, i in zip(sol_idx, sol_in_bs):
-        # switching from boundaries to BSs
-        if i < 1 or i > n_bs:
-            continue
-        bs_i = i-1
-
-        if bs_i == 0:
-            # check with lower layer, need at least two SF atoms touching the particle
-            d = np.linalg.norm(positions[idx] - bs_layer_pos[bs_i], axis=1)
-            # touching one of the SF oxygen is ok
-            if np.sum(d < d_min_outer_cutoff) > 0:
-                occupancy[bs_i].append(idx)
-
-        elif bs_i == n_bs-1:
-            # check with the upper layer instead
-            d  = np.linalg.norm(positions[idx] - bs_layer_pos[bs_i-1], axis=1)
-            # touching one of the SF oxygen is ok
-            if np.sum(d < d_min_outer_cutoff) > 0:
-                occupancy[bs_i].append(idx)
-
-        else:
-            # upper layer
-            d_u = np.linalg.norm(positions[idx] - bs_layer_pos[bs_i-1], axis=1)
-            # lower layer
-            d_l = np.linalg.norm(positions[idx] - bs_layer_pos[bs_i], axis=1)
-            # need to touch two of them
-            if np.sum(d_u < d_min_inner_cutoff) + np.sum(d_l < d_min_inner_cutoff) > 1:
-                occupancy[bs_i].append(idx)
-
     return occupancy
 
 def checkFlips(pos_all, sf_o_idx, cutoff=5):
@@ -913,8 +693,6 @@ class Channel:
         self.occupancy_4_all = []
         self.occupancy_6_all = []
         self.jumps_all = []
-        #self.jumps_4_all = []
-        #self.jumps_6_all = []
         self.cycles_all = []
         self.n_water_events = []
         self.n_k_events = []
@@ -928,12 +706,12 @@ class Channel:
         self.cycleProbs_6 = None
         self.mainPath = None
     
-    def run(self, output="kperm"):
+    def run(self, output="kperm", noJump=False):
 
         self.results_loc = []
 
         for traj in self.trajs:
-            run(self.coor, traj, output=output, CADistance=True, ignoreS0ScavJump=True)
+            run(self.coor, traj, noJump=noJump, output=output, CADistance=True, ignoreS0ScavJump=True)
 
             self.results_loc.append(os.path.dirname(traj))
 
@@ -1066,14 +844,6 @@ class Channel:
             print('==============================')
 
             self.stats = stats
-            
-            # if save:
-            #     save = os.path.abspath(save)
-            #     stats.to_csv(save)
-            #     print(f"Stats saved to {save}")
-            
-            #return stats , states
-
 
 
     def findCycles(self, node=None, n_bs_jump=4):
@@ -1112,13 +882,12 @@ class Channel:
         return plotNetFlux(self.occupancy_6_all, weight_threshold, save=save, returnGraphData=returnGraphData)
 
 @countTime
-def run(coor, traj, output="kperm", sf_idx=None, SFScanAllRes=False, CADistance=False, 
+def run(coor, traj, output="kperm", noJump=False, sf_idx=None, SFScanAllRes=False, CADistance=False, 
         ignoreS0ScavJump=True, pairwise=False, BScenter_cutoff=4.0):
     path = os.path.dirname(traj)
 
     log_loc = os.path.abspath(os.path.join(path, output+'.log'))
 
-    # remove handlers if any
     logger = createLogger(log_loc)
 
     print(f"Reading coordinate {coor}\nReading trajectory {traj}")
@@ -1151,42 +920,47 @@ def run(coor, traj, output="kperm", sf_idx=None, SFScanAllRes=False, CADistance=
             ca_d_diag[ts.frame] = computeSFAtomDistance(ts.positions, sf_ca_idx)
 
         flips[ts.frame] = checkFlips(ts.positions, sf_o_idx)
-        if pairwise:
-            k_occ = findBound_pairwiseComparison(ts.positions, k_idx, sf_o_idx)
-            w_occ = findBound_pairwiseComparison(ts.positions, water_idx, sf_o_idx)
-        else:
-            k_occ = findBound(ts.positions, k_idx, sf_o_idx, BScenter_cutoff=BScenter_cutoff)
-            w_occ = findBound(ts.positions, water_idx, sf_o_idx, BScenter_cutoff=BScenter_cutoff)
+
+        k_occ = findBound(ts.positions, k_idx, sf_o_idx, BScenter_cutoff=BScenter_cutoff)
+        w_occ = findBound(ts.positions, water_idx, sf_o_idx, BScenter_cutoff=BScenter_cutoff)
+
         k_occupancy.append(k_occ)
         w_occupancy.append(w_occ)
         if ts.frame % 1000 == 0:
             print('\r'+f'Finished processing frame {ts.frame} / {len(u.trajectory)}', end=' ')
-    #return k_occupancy
+            
 
     print("")
     occupancy[:len(k_occupancy)], double_occ = computeOccupancy_6BS(k_occupancy, w_occupancy)
     if len(double_occ) > 0:
-        logger.info(f"Double occupancy for S1 to S4 is found in {len(double_occ)} frames. Check log file for details.")
+        logger.info(f"Double occupancy for S1/S2/S3/S4 is found in {len(double_occ)} frames. Check log file for details.")
         for t, i in double_occ:
             logger.debug(f"In frame {t}, double occupancy is found in S{i}")
 
-    if ignoreS0ScavJump:
-        jumps[:len(k_occupancy)-1] = computeJumps_6BS_ignoreS0Scav(k_occupancy, w_occupancy)
+    if not noJump:
+        if ignoreS0ScavJump:
+            jumps[:len(k_occupancy)-1] = computeJumps_6BS_ignoreS0Scav(k_occupancy, w_occupancy)
+        else:
+            jumps[:len(k_occupancy)-1] = computeJumps_6BS(k_occupancy, w_occupancy)
+
+        k_j_sum = np.sum(jumps[:, 0])
+        w_j_sum = np.sum(jumps[:, 1])
+        
+
+        if ignoreS0ScavJump:
+            n_k_netjumps = int(np.fix(k_j_sum / 5)) #(len(occupancy[0]) + 1)
+            n_w_netjumps = int(np.fix(w_j_sum / 5)) #(len(occupancy[0]) + 1)
+        else:
+            n_k_netjumps = int(np.fix(k_j_sum / (len(occupancy[0]) + 1)))
+            n_w_netjumps = int(np.fix(w_j_sum / (len(occupancy[0]) + 1)))
+
+        current = n_k_netjumps * 1.602e-19 / (u.trajectory.totaltime*1e-12) * 1e12 # unit: pA
+
     else:
-        jumps[:len(k_occupancy)-1] = computeJumps_6BS(k_occupancy, w_occupancy)
+        n_k_netjumps = 0
+        n_w_netjumps = 0
+        current = 0.0
 
-    k_j_sum = np.sum(jumps[:, 0])
-    w_j_sum = np.sum(jumps[:, 1])
-    
-
-    if ignoreS0ScavJump:
-        n_k_netjumps = int(np.fix(k_j_sum / 5)) #(len(occupancy[0]) + 1)
-        n_w_netjumps = int(np.fix(w_j_sum / 5)) #(len(occupancy[0]) + 1)
-    else:
-        n_k_netjumps = int(np.fix(k_j_sum / (len(occupancy[0]) + 1)))
-        n_w_netjumps = int(np.fix(w_j_sum / (len(occupancy[0]) + 1)))
-
-    current = n_k_netjumps * 1.602e-19 / (u.trajectory.totaltime*1e-12) * 1e12 # unit: pA
     logger.info("=================================")
     logger.info(f"Total time: {u.trajectory.totaltime/1e3:.6f} ns")
     logger.info(f"dt: {u.trajectory.dt/1e3:.6f} ns")
