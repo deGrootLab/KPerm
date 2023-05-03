@@ -325,8 +325,10 @@ def findBound(positions, sol_indices, sf_o_indices, additional_bs_cutoff=4.0,
     occupancy: list of lists
         # lists = # binding sites
         each of the lists contains (zero-based) indices of particles occupying the corresponding BS (S0 to Scav, 6 in total)
-
+        occupancy[0] is particles occupancy S0
+        occupancy[6] is particles occupying Scav
     """
+
     bs_layer_o_pos = np.array([positions[indices] for indices in sf_o_indices])
     bs_layer_o_pos_z = np.mean(bs_layer_o_pos, axis=1)[:, 2]
     sol_pos_z = positions[sol_indices][:, 2]
@@ -706,12 +708,12 @@ class Channel:
         self.cycleProbs_6 = None
         self.mainPath = None
     
-    def run(self, output="kperm", noJump=False):
+    def run(self, method=['jump', 'cross'], output="kperm"):
 
         self.results_loc = []
 
         for traj in self.trajs:
-            run(self.coor, traj, noJump=noJump, output=output, CADistance=True, ignoreS0ScavJump=True)
+            run(self.coor, traj, method=method, output=output, CADistance=True, ignoreS0ScavJump=True)
 
             self.results_loc.append(os.path.dirname(traj))
 
@@ -746,15 +748,49 @@ class Channel:
                 log = f.read()
             total_time = float(re.search(r'Total time\D+(\d+\.\d+)', log).group(1))
             dt = float(re.search(r'dt\D+(\d+\.\d+)', log).group(1))
-            n_w = int(re.search(r'water permeation events = ([-+]?\d+)', log).group(1))
-            n_k = int(re.search(r'ion permeation events = ([-+]?\d+)', log).group(1))
-            current = float(re.search(r'Current = ([-+]?\d+\.\d+)', log).group(1))
+
+
             total_times.append(total_time)
             dts.append(dt)
-            currents.append(current)
-            n_water_events.append(n_w)
-            n_k_events.append(n_k)
-            print(f'OK')
+
+            try:
+                #for backward compatibility
+                n_k_jump = re.search(r'Number of net ion permeation events \(jump\) = ([-+]?\d+|N/A)', log).group(1)
+                n_w_jump = re.search(r'Number of net water permeation events \(jump\) = ([-+]?\d+|N/A)', log).group(1)
+                current_jump = re.search(r'Current \(jump\) = ([-+]?\d+\.\d+|N/A)', log).group(1)
+
+                n_k_cross = re.search(r'Number of net ion permeation events \(cross\) = ([-+]?\d+|N/A)', log).group(1)
+                n_w_cross = re.search(r'Number of net water permeation events \(cross\) = ([-+]?\d+|N/A)', log).group(1)
+                current_cross = re.search(r'Current \(cross\) = ([-+]?\d+\.\d+|N/A)', log).group(1)
+
+            except:
+
+                n_k_jump = re.search(r'Number of net ion permeation events = ([-+]?\d+|N/A)', log).group(1)
+                n_w_jump = re.search(r'Number of net water permeation events = ([-+]?\d+|N/A)', log).group(1)
+                current_jump = re.search(r'Current = ([-+]?\d+\.\d+|N/A)', log).group(1)
+
+                n_k_cross = 'N/A'
+                n_w_cross = 'N/A'
+                current_cross = 'N/A'
+
+
+
+            if n_k_jump != 'N/A':
+                n_k_events.append(int(n_k_jump))
+                n_water_events.append(int(n_w_jump))
+                currents.append(float(current_jump))
+                print("permeation counts based on jumps are used.")
+
+            elif n_k_cross != 'N/A':
+                n_k_events.append(int(n_k_cross))
+                n_water_events.append(int(n_w_cross))
+                currents.append(float(current_cross))
+                print("permeation counts based on jumps are not found, counts based on cross are used.")
+
+            else:
+                print("No permeation count data are available.")
+
+
         print('Loading finished.')
 
         self.occupancy_4_all = occupancy_4_all
@@ -845,7 +881,6 @@ class Channel:
 
             self.stats = stats
 
-
     def findCycles(self, node=None, n_bs_jump=4):
         if node is None:
             raise ValueError("The name of the statein in which the cycles start and end is required.")
@@ -882,7 +917,7 @@ class Channel:
         return plotNetFlux(self.occupancy_6_all, weight_threshold, save=save, returnGraphData=returnGraphData)
 
 @countTime
-def run(coor, traj, output="kperm", noJump=False, sf_idx=None, SFScanAllRes=False, CADistance=False, 
+def run(coor, traj, output="kperm", method=['jump', 'cross'], sf_idx=None, SFScanAllRes=False, CADistance=False, 
         ignoreS0ScavJump=True, pairwise=False, BScenter_cutoff=4.0):
     path = os.path.dirname(traj)
 
@@ -937,38 +972,49 @@ def run(coor, traj, output="kperm", noJump=False, sf_idx=None, SFScanAllRes=Fals
         for t, i in double_occ:
             logger.debug(f"In frame {t}, double occupancy is found in S{i}")
 
-    if not noJump:
+    n_k_netjumps = 'N/A'
+    n_w_netjumps = 'N/A'
+    current_jump = 'N/A'
+
+    n_k_cross = 'N/A'
+    n_w_cross = 'N/A'
+    current_cross = 'N/A'
+
+    if 'jump' in method:
         if ignoreS0ScavJump:
             jumps[:len(k_occupancy)-1] = computeJumps_6BS_ignoreS0Scav(k_occupancy, w_occupancy)
-        else:
-            jumps[:len(k_occupancy)-1] = computeJumps_6BS(k_occupancy, w_occupancy)
+            k_j_sum = np.sum(jumps[:, 0])
+            w_j_sum = np.sum(jumps[:, 1])
 
-        k_j_sum = np.sum(jumps[:, 0])
-        w_j_sum = np.sum(jumps[:, 1])
-        
-
-        if ignoreS0ScavJump:
             n_k_netjumps = int(np.fix(k_j_sum / 5)) #(len(occupancy[0]) + 1)
             n_w_netjumps = int(np.fix(w_j_sum / 5)) #(len(occupancy[0]) + 1)
+
         else:
+            jumps[:len(k_occupancy)-1] = computeJumps_6BS(k_occupancy, w_occupancy)
+            k_j_sum = np.sum(jumps[:, 0])
+            w_j_sum = np.sum(jumps[:, 1])
+
             n_k_netjumps = int(np.fix(k_j_sum / (len(occupancy[0]) + 1)))
             n_w_netjumps = int(np.fix(w_j_sum / (len(occupancy[0]) + 1)))
 
-        current = n_k_netjumps * 1.602e-19 / (u.trajectory.totaltime*1e-12) * 1e12 # unit: pA
-
-    else:
-        n_k_netjumps = 0
-        n_w_netjumps = 0
-        current = 0.0
+        current_jump = n_k_netjumps * 1.602e-19 / (u.trajectory.totaltime*1e-12) * 1e12 # unit: pA
+    
+    if 'cross' in method:
+        n_k_cross = np.sum(permeationCount_cross(k_occupancy, group1=[0, 1, 2], group2=[3, 4, 5]))
+        n_w_cross = np.sum(permeationCount_cross(w_occupancy, group1=[0, 1, 2], group2=[3, 4, 5]))
+        current_cross = n_k_cross * 1.602e-19 / (u.trajectory.totaltime*1e-12) * 1e12 # unit: pA
 
     logger.info("=================================")
     logger.info(f"Total time: {u.trajectory.totaltime/1e3:.6f} ns")
     logger.info(f"dt: {u.trajectory.dt/1e3:.6f} ns")
     logger.info(f"Number of K+: {len(k_idx)}")
     logger.info(f"Number of water: {len(water_idx)}")
-    logger.info(f"Number of net water permeation events = {n_w_netjumps}")
-    logger.info(f"Number of net ion permeation events = {n_k_netjumps}")
-    logger.info(f"Current = {current:.5f} pA")
+    logger.info(f"Number of net ion permeation events (jump) = {n_k_netjumps}")
+    logger.info(f"Number of net ion permeation events (cross) = {n_k_cross}")
+    logger.info(f"Number of net water permeation events (jump) = {n_w_netjumps}")
+    logger.info(f"Number of net water permeation events (cross) = {n_w_cross}")
+    logger.info(f"Current (jump) = {current_jump} pA")
+    logger.info(f"Current (cross) = {current_cross} pA")
 
 
     if CADistance:
