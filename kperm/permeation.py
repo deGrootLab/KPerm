@@ -9,6 +9,8 @@ import matplotlib.pyplot as plt
 def permeationCount_cross(occupancy, group1=[0, 1, 2], group2=[3, 4, 5]):
     permeationTraj = np.zeros(len(occupancy), dtype=int)
     permeationObjects = dict()
+    perm_up = []
+    perm_down = []
 
     for t, occ in enumerate(occupancy):
         for site in group1:
@@ -21,6 +23,8 @@ def permeationCount_cross(occupancy, group1=[0, 1, 2], group2=[3, 4, 5]):
                     # came from group2, now it is in group 1, so it is an upward flow
                     permeationObjects[index] = 1
                     permeationTraj[t] += 1
+
+                    perm_up.append((t, index))
                     
         for site in group2:
             for index in occ[site]:
@@ -33,6 +37,8 @@ def permeationCount_cross(occupancy, group1=[0, 1, 2], group2=[3, 4, 5]):
                     permeationObjects[index] = 2
                     permeationTraj[t] -= 1
 
+                    perm_down.append((t, index))
+
         # iterate over permeationObjects to check if any of the bound objects escape from SF
         # remove them if they have escaped
         indices = list(permeationObjects.keys())
@@ -42,7 +48,7 @@ def permeationCount_cross(occupancy, group1=[0, 1, 2], group2=[3, 4, 5]):
             else:
                 permeationObjects.pop(index)
 
-    return permeationTraj
+    return permeationTraj, perm_up, perm_down
 
 def permeationEventsPartition(occupancy, jump, seedState, n_bs_jump):
     """ partitioning trajectory into permeation events

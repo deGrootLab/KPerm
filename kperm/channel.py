@@ -8,7 +8,8 @@ import sys
 import re
 from scipy.stats import bootstrap
 from functools import wraps
-from .permeation import *
+from kperm.permeation import *
+from kperm.utils import write_list_of_tuples
 
 def countTime(func):
     @wraps(func)
@@ -708,12 +709,12 @@ class Channel:
         self.cycleProbs_6 = None
         self.mainPath = None
     
-    def run(self, method=['jump', 'cross'], output="kperm"):
+    def run(self, perm_count=['cross'], output="kperm", perm_details=False):
 
         self.results_loc = []
 
         for traj in self.trajs:
-            run(self.coor, traj, method=method, output=output, CADistance=True, ignoreS0ScavJump=True)
+            run(self.coor, traj, perm_count=perm_count, perm_details=perm_details, output=output, CADistance=True, ignoreS0ScavJump=True)
 
             self.results_loc.append(os.path.dirname(traj))
 
@@ -754,7 +755,7 @@ class Channel:
             dts.append(dt)
 
             try:
-                #for backward compatibility
+                
                 n_k_jump = re.search(r'Number of net ion permeation events \(jump\) = ([-+]?\d+|N/A)', log).group(1)
                 n_w_jump = re.search(r'Number of net water permeation events \(jump\) = ([-+]?\d+|N/A)', log).group(1)
                 current_jump = re.search(r'Current \(jump\) = ([-+]?\d+\.\d+|N/A)', log).group(1)
@@ -764,7 +765,7 @@ class Channel:
                 current_cross = re.search(r'Current \(cross\) = ([-+]?\d+\.\d+|N/A)', log).group(1)
 
             except:
-
+                #for backward compatibility
                 n_k_jump = re.search(r'Number of net ion permeation events = ([-+]?\d+|N/A)', log).group(1)
                 n_w_jump = re.search(r'Number of net water permeation events = ([-+]?\d+|N/A)', log).group(1)
                 current_jump = re.search(r'Current = ([-+]?\d+\.\d+|N/A)', log).group(1)
@@ -917,7 +918,7 @@ class Channel:
         return plotNetFlux(self.occupancy_6_all, weight_threshold, save=save, returnGraphData=returnGraphData)
 
 @countTime
-def run(coor, traj, output="kperm", method=['jump', 'cross'], sf_idx=None, SFScanAllRes=False, CADistance=False, 
+def run(coor, traj, output="kperm", perm_count=['cross'], perm_details=False, sf_idx=None, SFScanAllRes=False, CADistance=False, 
         ignoreS0ScavJump=True, pairwise=False, BScenter_cutoff=4.0):
     path = os.path.dirname(traj)
 
@@ -938,6 +939,11 @@ def run(coor, traj, output="kperm", method=['jump', 'cross'], sf_idx=None, SFSca
 
     k_occupancy = []
     w_occupancy = []
+
+    if perm_details:
+        k_in_sf = []
+        w_in_sf = []
+
 
     occupancy = np.zeros(len(u.trajectory), dtype='<6U')
     jumps = np.zeros((len(u.trajectory), 2), dtype=int)
@@ -961,6 +967,18 @@ def run(coor, traj, output="kperm", method=['jump', 'cross'], sf_idx=None, SFSca
 
         k_occupancy.append(k_occ)
         w_occupancy.append(w_occ)
+
+        if perm_details:
+            # unwrap k_occ and w_occ for sf_occ_k.dat and sf_occ_w.dat
+            k_occ_unwrap = [(index, bs_i) for bs_i, bs in enumerate(k_occ) for index in bs]
+            w_occ_unwrap = [(index, bs_i) for bs_i, bs in enumerate(w_occ) for index in bs]
+
+            for i, (index, bs_i) in enumerate(k_occ_unwrap):
+                k_in_sf.append(tuple([ts.frame, index, f"{ts.positions[index][2]:.5f}", bs_i]))
+            for i, (index, bs_i) in enumerate(w_occ_unwrap):
+                w_in_sf.append(tuple([ts.frame, index, f"{ts.positions[index][2]:.5f}", bs_i]))
+
+
         if ts.frame % 1000 == 0:
             print('\r'+f'Finished processing frame {ts.frame} / {len(u.trajectory)}', end=' ')
             
@@ -980,7 +998,7 @@ def run(coor, traj, output="kperm", method=['jump', 'cross'], sf_idx=None, SFSca
     n_w_cross = 'N/A'
     current_cross = 'N/A'
 
-    if 'jump' in method:
+    if 'jump' in perm_count:
         if ignoreS0ScavJump:
             jumps[:len(k_occupancy)-1] = computeJumps_6BS_ignoreS0Scav(k_occupancy, w_occupancy)
             k_j_sum = np.sum(jumps[:, 0])
@@ -999,10 +1017,28 @@ def run(coor, traj, output="kperm", method=['jump', 'cross'], sf_idx=None, SFSca
 
         current_jump = n_k_netjumps * 1.602e-19 / (u.trajectory.totaltime*1e-12) * 1e12 # unit: pA
     
-    if 'cross' in method:
-        n_k_cross = np.sum(permeationCount_cross(k_occupancy, group1=[0, 1, 2], group2=[3, 4, 5]))
-        n_w_cross = np.sum(permeationCount_cross(w_occupancy, group1=[0, 1, 2], group2=[3, 4, 5]))
-        current_cross = n_k_cross * 1.602e-19 / (u.trajectory.totaltime*1e-12) * 1e12 # unit: pA
+    if 'cross' in perm_count:
+        kperm_traj, kperm_up, kperm_down = permeationCount_cross(k_occupancy, group1=[0, 1, 2], group2=[3, 4, 5])
+        wperm_traj, wperm_up, wperm_down = permeationCount_cross(w_occupancy, group1=[0, 1, 2], group2=[3, 4, 5])
+
+        if perm_details:
+            write_list_of_tuples(os.path.join(path, 'kperm_up.dat'), kperm_up)
+            write_list_of_tuples(os.path.join(path, 'kperm_down.dat'), kperm_down)
+            write_list_of_tuples(os.path.join(path, 'wperm_up.dat'), wperm_up)
+            write_list_of_tuples(os.path.join(path, 'wperm_down.dat'), wperm_down)
+
+            write_list_of_tuples(os.path.join(path, 'k_in_sf.dat'), k_in_sf)
+            write_list_of_tuples(os.path.join(path, 'w_in_sf.dat'), w_in_sf) 
+
+        n_net_k_cross = np.sum(kperm_traj)
+        n_net_w_cross = np.sum(wperm_traj)
+        n_upward_k_cross = len(kperm_up)
+        n_downward_k_cross = len(kperm_down)
+        n_upward_w_cross = len(wperm_up)
+        n_downward_w_cross = len(wperm_down)
+
+        current_cross = n_net_k_cross * 1.602e-19 / (u.trajectory.totaltime*1e-12) * 1e12 # unit: pA
+
 
     logger.info("=================================")
     logger.info(f"Total time: {u.trajectory.totaltime/1e3:.6f} ns")
@@ -1010,11 +1046,15 @@ def run(coor, traj, output="kperm", method=['jump', 'cross'], sf_idx=None, SFSca
     logger.info(f"Number of K+: {len(k_idx)}")
     logger.info(f"Number of water: {len(water_idx)}")
     logger.info(f"Number of net ion permeation events (jump) = {n_k_netjumps}")
-    logger.info(f"Number of net ion permeation events (cross) = {n_k_cross}")
     logger.info(f"Number of net water permeation events (jump) = {n_w_netjumps}")
-    logger.info(f"Number of net water permeation events (cross) = {n_w_cross}")
     logger.info(f"Current (jump) = {current_jump} pA")
-    logger.info(f"Current (cross) = {current_cross} pA")
+    logger.info(f"Number of upward ion permeation events (cross) = {n_upward_k_cross}")
+    logger.info(f"Number of downward ion permeation events (cross) = {n_downward_k_cross}")
+    logger.info(f"Number of net ion permeation events (cross) = {n_net_k_cross}")
+    logger.info(f"Number of upward water permeation events (cross) = {n_upward_w_cross}")
+    logger.info(f"Number of downward water permeation events (cross) = {n_downward_w_cross}")
+    logger.info(f"Number of net water permeation events (cross) = {n_net_w_cross}")
+    logger.info(f"Ion Current (cross) = {current_cross} pA")
 
 
     if CADistance:

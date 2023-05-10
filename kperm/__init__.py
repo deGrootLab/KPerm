@@ -1,2 +1,2 @@
-from .channel import *
-from .permeation import *
+from kperm.channel import *
+from kperm.permeation import *
