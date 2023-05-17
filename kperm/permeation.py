@@ -333,13 +333,13 @@ def findCycles(occupancy_all, jumps_all, seedState, n_bs_jump=4):
         print(f"Number of permeation events: {int(n_k_netjump)}")
         print(f"Number of identified cycles: {n_identified_cycle} \t {n_identified_cycle/n_k_netjump * 100:.2f}%\n")
 
-
+    identified_percentage = np.sum(n_identified_cycles)/np.sum(n_k_netjumps)
     
     print(f"Total number of permeation events: {int(np.sum(n_k_netjumps))}")
-    print(f"Total number of identified cycles: {np.sum(n_identified_cycles)} \t {np.sum(n_identified_cycles)/np.sum(n_k_netjumps) * 100:.3f}%\n\n")
+    print(f"Total number of identified cycles: {np.sum(n_identified_cycles)} \t {identified_percentage * 100:.3f}%\n\n")
 
 
-    return permeationCycles, p_indices_all
+    return permeationCycles, p_indices_all, identified_percentage
 
 def computeTransProb(trajs, return_matrix=False, quiet=False):
     """ given trajectories, compute transition probabilities

@@ -846,11 +846,11 @@ based on cross are used."
 and end is required."
             )
         elif len(node) == 4:
-            self.cycles_all, self.permeation_idx_all = findCycles(
+            self.cycles_all, self.permeation_idx_all, cycle_perc = findCycles(
                 self.occupancy_4_all, self.jumps_all, node, n_bs_jump=n_bs_jump
             )
         elif len(node) == 6:
-            self.cycles_all, self.permeation_idx_all = findCycles(
+            self.cycles_all, self.permeation_idx_all, cycle_perc = findCycles(
                 self.occupancy_6_all, self.jumps_all, node, n_bs_jump=n_bs_jump
             )
         else:
@@ -859,6 +859,8 @@ and end is required."
         cycles_flattened = [c for cycle in self.cycles_all for c in cycle]
         # probs: dict, key=state, value=(target state, %, count)
         self.cycleProbs_6 = computeTransProb(cycles_flattened, quiet=True)
+
+        return cycle_perc
 
     def plotCycles(
         self,
