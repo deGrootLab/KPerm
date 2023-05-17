@@ -620,7 +620,7 @@ class Channel:
         self.results_loc = []
 
         for traj in self.trajs:
-            run(self.coor, traj, perm_count=perm_count, perm_details=perm_details, output=output, CADistance=True, ignoreS0ScavJump=True)
+            run(self.coor, traj, perm_count=perm_count, perm_details=perm_details, output=output, CADistance=True)
 
             self.results_loc.append(os.path.dirname(traj))
 
@@ -825,7 +825,7 @@ class Channel:
 
 @countTime
 def run(coor, traj, output="kperm", perm_count=['cross'], perm_details=False, sf_idx=None, SFScanAllRes=False, CADistance=False, 
-        ignoreS0ScavJump=True, pairwise=False, BScenter_cutoff=4.0):
+        pairwise=False, BScenter_cutoff=4.0):
     path = os.path.dirname(traj)
 
     log_loc = os.path.abspath(os.path.join(path, output+'.log'))
