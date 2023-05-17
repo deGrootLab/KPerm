@@ -491,6 +491,10 @@ def computeOccupancy_6BS(k_occ_whole, w_occ_whole, bs_ignore=[0, 5]):
 
 def computeJumps_6BS(k_occ_all, w_occ_all):
     """ compute ion and water net jump for the whole trajectory
+        *** it ignores jump across S0 and Scav (S5) ***
+        e.g. t_0 = [[],[],[],[],[],[]]
+             t_1 = [[],[],[],[],[2],[]]
+             jump = 1
 
     Parameters
     ----------
@@ -517,108 +521,8 @@ def computeJumps_6BS(k_occ_all, w_occ_all):
 
 def computeJump_6BS(occ_t0, occ_t1, t0=0.0):
     """ compute net number of jumps given the current and the next occupation states
-
-    Parameters
-    ----------
-    occ_t0 : list of lists of int
-        each list contains atom idx that occupies the corresponding binding site at t=t0
-        e.g. occ_t0 = [[], [], [33577], [33596], [], []]
-    occ_t1 : list of lists of int
-        each list contains atom idx that occupies the corresponding binding site at t=t1
-        e.g. occ_t1 = [[33577], [], [], [33596], [], []]
-    t0 : float (optional)
-        current timestep, only used for error report/debug
-
-    Returns
-    -------
-    jump: int
-        net number of jumps given the current and the next occupation states
-    """
-    # only work for 6 binding sites
-    assert len(occ_t0) == 6
-
-    jump = 0
-    checked = []
-
-    # check occ_t1 for new positions of particles present in occ_t0
-    for bs_i_t0, bs_t0 in enumerate(occ_t0):
-        for sol_i_t0 in bs_t0:
-            new_pos = [i for (i, bs_t1) in enumerate(occ_t1) if sol_i_t0 in bs_t1]
-            if len(new_pos) > 1:
-                print(f"At time {time}, same solvent/solute is identified more than once")
-                raise Exception
-            elif len(new_pos) == 0:
-                if bs_i_t0 == 2 or bs_i_t0 == 3:
-                    print(f"At step {t0}, new position of idx {sol_i_t0} in S{bs_i_t0} cannot be found, jump too much?")
-                    raise Exception
-                elif bs_i_t0 == 0 or bs_i_t0 == 1:
-                    # assume it has escaped through S0, so set it beyond S0
-                    new_pos_idx = -1
-                else:
-                    # assume it has escaped through Scav, so set it beyond Scav
-                    new_pos_idx = 6
-            else:
-                new_pos_idx = new_pos[0]
-            # jump > 0 means forward, toward S0
-            jump += bs_i_t0 - new_pos_idx
-
-            if sol_i_t0 not in checked:
-                checked.append(sol_i_t0)
-            else:
-                print(f"At step {time}, {sol_i_t0} was found twice")
-                raise Exception
-
-    for bs_i_t1, bs_t1 in enumerate(occ_t1):
-        for sol_i_t1 in bs_t1:
-            if sol_i_t1 in checked:
-                continue
-            else:
-                if bs_i_t1 == 2 or bs_i_t1 == 3:
-                    print(f"At step {t0+1}, history of idx {sol_i_t1} which is found in S2/S3 \
-    cannot be traced, jump too fast?")
-                    raise Exception
-                elif bs_i_t1 == 0 or bs_i_t1 == 1:
-                    # assume it has entered through S0, so set it beyond S0
-                    old_pos_idx = -1
-                else:
-                    # assume it has entered through Scav, so set it beyond Scav
-                    old_pos_idx = 6
-                jump += old_pos_idx - bs_i_t1
-    return jump
-
-def computeJumps_6BS_ignoreS0Scav(k_occ_all, w_occ_all):
-    """ compute ion and water net jump for the whole trajectory
-        *** it ignores jump across S0 and Scav (S5) ***
-        e.g. t_0 = [[],[],[],[],[],[]]
-             t_1 = [[],[],[],[],[2],[]]
-             jump = 1
-
-    Parameters
-    ----------
-    k_occ_all: list of lists
-        # lists = # binding sites
-        each of the lists contains indices of ion occupying the corresponding binding site
-
-    w_occ_all: list of lists
-        same as above, except that it is for water
-
-    Returns
-    -------
-    jumps: narray
-        jumps[i, 0] saves # net jumps of ion occurred between i-th step and (i+1)-th step
-        jumps[i, 1] saves # net jumps of water occurred between i-th step and (i+1)-th step
-
-    """
-
-    jumps = np.zeros((len(k_occ_all)-1, 2), dtype=int)
-    for i in range(len(jumps)):
-        jumps[i, 0] = computeJump_6BS_ignoreS0Scav(k_occ_all[i], k_occ_all[i+1], t0=i)
-        jumps[i, 1] = computeJump_6BS_ignoreS0Scav(w_occ_all[i], w_occ_all[i+1], t0=i)
-    return jumps
-
-def computeJump_6BS_ignoreS0Scav(occ_t0, occ_t1, t0=0.0):
-    """ compute net number of jumps given the current and the next occupation states
-        *** it ignores jump across S0 and Scav (S5) ***
+        It ignores jump across S0 and Scav (S5) by setting the currently occupied BS as
+        S0 and S5 if the ion/water is above S0 and below S5, respectively.
 
     Parameters
     ----------
@@ -680,10 +584,12 @@ def computeJump_6BS_ignoreS0Scav(occ_t0, occ_t1, t0=0.0):
     cannot be traced, jump too much?")
                     raise Exception
                 elif bs_i_t1 == 0 or bs_i_t1 == 1:
-                    # assume it has entered through S0, so set it beyond S0
+                    # assume it has entered through S0, so set it at S0 to ignore jump between extracellular
+                    # region and S0
                     old_pos_idx = 0
                 else:
-                    # assume it has entered through Scav, so set it beyond Scav
+                    # assume it has entered through Scav, so set it at Scav to ignore jump between cytoplasm
+                    # and Scav
                     old_pos_idx = 5
                 jump += old_pos_idx - bs_i_t1
     return jump
@@ -999,21 +905,12 @@ def run(coor, traj, output="kperm", perm_count=['cross'], perm_details=False, sf
     current_cross = 'N/A'
 
     if 'jump' in perm_count:
-        if ignoreS0ScavJump:
-            jumps[:len(k_occupancy)-1] = computeJumps_6BS_ignoreS0Scav(k_occupancy, w_occupancy)
-            k_j_sum = np.sum(jumps[:, 0])
-            w_j_sum = np.sum(jumps[:, 1])
+        jumps[:len(k_occupancy)-1] = computeJumps_6BS(k_occupancy, w_occupancy)
+        k_j_sum = np.sum(jumps[:, 0])
+        w_j_sum = np.sum(jumps[:, 1])
 
-            n_k_netjumps = int(np.fix(k_j_sum / 5)) #(len(occupancy[0]) + 1)
-            n_w_netjumps = int(np.fix(w_j_sum / 5)) #(len(occupancy[0]) + 1)
-
-        else:
-            jumps[:len(k_occupancy)-1] = computeJumps_6BS(k_occupancy, w_occupancy)
-            k_j_sum = np.sum(jumps[:, 0])
-            w_j_sum = np.sum(jumps[:, 1])
-
-            n_k_netjumps = int(np.fix(k_j_sum / (len(occupancy[0]) + 1)))
-            n_w_netjumps = int(np.fix(w_j_sum / (len(occupancy[0]) + 1)))
+        n_k_netjumps = int(np.fix(k_j_sum / 5))
+        n_w_netjumps = int(np.fix(w_j_sum / 5))
 
         current_jump = n_k_netjumps * 1.602e-19 / (u.trajectory.totaltime*1e-12) * 1e12 # unit: pA
     
