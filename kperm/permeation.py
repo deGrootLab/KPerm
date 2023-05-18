@@ -12,7 +12,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 
 
-def _count_perm_cross(occupancy, group1=[0, 1, 2], group2=[3, 4, 5]):
+def _count_perm_cross(occupancy, group1=(0, 1, 2), group2=(3, 4, 5)):
     """Identify permeation events crossing the S2/S3 plane
 
     Parameters
@@ -49,7 +49,7 @@ def _count_perm_cross(occupancy, group1=[0, 1, 2], group2=[3, 4, 5]):
     for t, occ in enumerate(occupancy):
         for site in group1:
             for index in occ[site]:
-                if index not in permeating_objects.keys():
+                if index not in permeating_objects:
                     permeating_objects[index] = 1
                 elif permeating_objects[index] == 1:
                     continue
@@ -62,7 +62,7 @@ def _count_perm_cross(occupancy, group1=[0, 1, 2], group2=[3, 4, 5]):
 
         for site in group2:
             for index in occ[site]:
-                if index not in permeating_objects.keys():
+                if index not in permeating_objects:
                     permeating_objects[index] = 2
                 elif permeating_objects[index] == 2:
                     continue
@@ -200,7 +200,7 @@ not the same"
     return np.array(cycle_reduced + [cycle_reduced[0]])
 
 
-def _find_cycles(occupancy_all, jumps_all, seedState, n_jump_per_cycle=5):
+def _find_cycles(occupancy_all, jumps_all, cycle_state, n_jump_per_cycle=5):
     """Given occupancy and jumps of the trajectories, the seed state, and
     n_jump_per_cycle that define the # BSs in which jumps in and out are
     considered, give the cycles that start and end in the seed state.
@@ -213,7 +213,7 @@ def _find_cycles(occupancy_all, jumps_all, seedState, n_jump_per_cycle=5):
     jumps_all: list of arrays of size (N-1, 2)
         net jumps for ion and water for all trajectories
 
-    seedState: string
+    cycle_state: string
         the SF occupation state that the cycles start and end in
 
     n_jump_per_cycle: int
@@ -227,8 +227,8 @@ def _find_cycles(occupancy_all, jumps_all, seedState, n_jump_per_cycle=5):
     permeationCycle_indices: list of lists of arrays
         contain the cycles identified in each trajectory
     """
-    permeationCycles = []
-    p_indices_all = []
+    full_perm_cycles = []
+    full_perm_idx = []
 
     n_k_netjumps = []
     n_identified_cycles = []
@@ -237,15 +237,15 @@ def _find_cycles(occupancy_all, jumps_all, seedState, n_jump_per_cycle=5):
         print(f"Trajectory {i}")
 
         p_indices = _partition_perm_events(
-            occupancy, jumps, seedState, n_jump_per_cycle=n_jump_per_cycle
+            occupancy, jumps, cycle_state, n_jump_per_cycle=n_jump_per_cycle
         )
-        p_indices_all.append(p_indices)
+        full_perm_idx.append(p_indices)
 
-        permeationCycles_ = [
+        full_perm_cycles_ = [
             _reduce_cycle(occupancy[i: j + 1], jumps[i: j + 1, 0])
             for (i, j) in p_indices
         ]
-        permeationCycles.append(permeationCycles_)
+        full_perm_cycles.append(full_perm_cycles_)
 
         n_k_netjump = np.sum(jumps[:, 0]) // n_jump_per_cycle
         n_identified_cycle = len(p_indices)
@@ -267,7 +267,7 @@ def _find_cycles(occupancy_all, jumps_all, seedState, n_jump_per_cycle=5):
         + f" {identified_percentage * 100:.3f}%\n\n"
     )
 
-    return permeationCycles, p_indices_all, identified_percentage
+    return full_perm_cycles, full_perm_idx, identified_percentage
 
 
 def _compute_trans_prob(trajs, return_matrix=False, quiet=False):
@@ -418,15 +418,15 @@ def _plot_cycle(
     states_selected = states_all[state_p > state_threshold]
 
     # assume that states are already sorted in descending order of population
-    seedState = list(cycles_dict)[0]
+    cycle_state = list(cycles_dict)[0]
 
     backbone = []
-    backbone.append(seedState)
+    backbone.append(cycle_state)
 
-    state = list(cycles_dict[seedState].keys())[0]
+    state = list(cycles_dict[cycle_state].keys())[0]
     backbone.append(state)
 
-    while backbone[-1] != seedState:
+    while backbone[-1] != cycle_state:
         state = list(cycles_dict[state].keys())[0]
         backbone.append(state)
 
@@ -550,8 +550,9 @@ def _plot_cycle(
         return cycles_dict
 
 
-def hittingTimes(occupancy, jumps, intStates,
-                 finalStates, n_jump_per_cycle=5, backward=False):
+def _compute_first_passage_times(
+        occupancy, jumps, initial_states,
+        final_states, n_jump_per_cycle=5, backward=False):
     """compute hitting time for transition pairs within one permeation event,
         i.e. abs(k_netjumps) < n_bs_jump+1
 
@@ -563,10 +564,10 @@ def hittingTimes(occupancy, jumps, intStates,
     jumps: arrays of size (N-1, 2)
         net jumps for ion and water for one trajectory
 
-    intStates: list of strings
+    initial_states: list of strings
         the SF occupation state that the transitions start in
 
-    finalStates: list of strings
+    final_states: list of strings
         the SF occupation state that the transitions end in
 
     n_jump_per_cycle: int
@@ -582,7 +583,7 @@ def hittingTimes(occupancy, jumps, intStates,
 
     Returns
     -------
-    fps: list of int
+    fpts: list of int
         First passage time
 
     k_netjumps_count: list of int
@@ -592,8 +593,8 @@ def hittingTimes(occupancy, jumps, intStates,
         # net water jumps involved in the transitions
     """
 
-    # intStates should contain 1 state only
-    fps = []
+    # initial_states should contain 1 state only
+    fpts = []
 
     # count number of k and w jumps happening during the period for which
     # hitting times are computed
@@ -604,18 +605,18 @@ def hittingTimes(occupancy, jumps, intStates,
     w_netjumps = jumps[:, 1]
 
     waiting = False
-    hittingTime = 0
+    passage_time = 0
 
     # count for each initial state to avoid overlooking some of the initial
     # states in scenario like
     #    initialState_1 -> xxx -> initialState_2 -> xxx -> finalState_2
     # where initialState_2 won't be counted if otherwise
-    for intState in intStates:
+    for int_states in initial_states:
         for i, s in enumerate(occupancy):
-            if s in intState and waiting is False:
+            if s in int_states and waiting is False:
                 waiting = True
                 start_idx = i
-            elif s in finalStates and waiting is True:
+            elif s in final_states and waiting is True:
                 end_idx = i
                 if jumps is None:
                     k_netjump = 0
@@ -638,8 +639,8 @@ def hittingTimes(occupancy, jumps, intStates,
                     )
                     or n_jump_per_cycle == 0
                 ):
-                    hittingTime = end_idx - start_idx
-                    fps.append(hittingTime)
+                    passage_time = end_idx - start_idx
+                    fpts.append(passage_time)
                     k_netjumps_counts.append(k_netjump)
                     w_netjumps_counts.append(w_netjump)
 
@@ -647,10 +648,10 @@ def hittingTimes(occupancy, jumps, intStates,
                 start_idx = None
                 end_idx = None
 
-    return fps, k_netjumps_counts, w_netjumps_counts
+    return fpts, k_netjumps_counts, w_netjumps_counts
 
 
-def _compute_MFPT(
+def _compute_mfpt(
     occupancy_all,
     jumps_all,
     pairs,
@@ -660,7 +661,7 @@ def _compute_MFPT(
     batch=10000,
     n_resamples=10000,
 ):
-    """compute hitting time for all transition pairs
+    """compute mean first passage times (MFPTs) for all transition pairs
 
     Parameters
     ----------
@@ -692,65 +693,65 @@ def _compute_MFPT(
     """
     data = []
     hts_output = {}
-    for initialStates, finalStates in pairs:
-        hTs_all = []
+    for initial_states, final_states in pairs:
+        fpts_all = []
         k_j_counts_all = []
         w_j_counts_all = []
-        inititalStates_label = ",".join(initialStates)
-        finalStates_label = ",".join(finalStates)
+        initial_states_label = ",".join(initial_states)
+        final_states_label = ",".join(final_states)
 
         for occupancy, jumps in zip(occupancy_all, jumps_all):
-            hTs, k_j_counts, w_j_counts = hittingTimes(
+            fpts, k_j_counts, w_j_counts = _compute_first_passage_times(
                 occupancy,
                 jumps,
-                initialStates,
-                finalStates,
+                initial_states,
+                final_states,
                 n_jump_per_cycle=n_jump_per_cycle,
                 backward=backward,
             )
-            hTs_all += hTs
+            fpts_all += fpts
             k_j_counts_all += k_j_counts
             w_j_counts_all += w_j_counts
 
-        hTs_all = np.asarray(hTs_all) * dt
-        n_hTs = len(hTs_all)
+        fpts_all = np.asarray(fpts_all) * dt
+        n_fpts = len(fpts_all)
 
-        if n_hTs > 1:
-            hTs_all_mean = np.mean(hTs_all)
+        if n_fpts > 1:
+            fpts_all_mean = np.mean(fpts_all)
 
-            if np.std(hTs_all) > 0.0:
-                hTs_all_bs = scipy.stats.bootstrap(
-                    (hTs_all,),
+            if np.std(fpts_all) > 0.0:
+                fpts_all_bs = scipy.stats.bootstrap(
+                    (fpts_all,),
                     np.mean,
                     confidence_level=0.95,
                     batch=batch,
                     n_resamples=n_resamples,
                     method="BCa",
                 )
-                hTs_all_bs_l, hTs_all_bs_u = hTs_all_bs.confidence_interval
+                fpts_all_bs_l, fpts_all_bs_u = fpts_all_bs.confidence_interval
             else:
-                hTs_all_bs_l, hTs_all_bs_u = 0.0, 0.0
+                fpts_all_bs_l, fpts_all_bs_u = 0.0, 0.0
 
             k_j_counts_all_mean = np.mean(k_j_counts_all)
             w_j_counts_all_mean = np.mean(w_j_counts_all)
         else:
-            hTs_all_mean = 0.0
-            hTs_all_bs_l, hTs_all_bs_u = 0.0, 0.0
+            fpts_all_mean = 0.0
+            fpts_all_bs_l, fpts_all_bs_u = 0.0, 0.0
             k_j_counts_all_mean, w_j_counts_all_mean = 0.0, 0.0
 
         row = [
-            inititalStates_label,
-            finalStates_label,
-            hTs_all_mean,
-            hTs_all_bs_l,
-            hTs_all_bs_u,
-            n_hTs,
+            initial_states_label,
+            final_states_label,
+            fpts_all_mean,
+            fpts_all_bs_l,
+            fpts_all_bs_u,
+            n_fpts,
             k_j_counts_all_mean,
             w_j_counts_all_mean,
         ]
 
-        hts_output[inititalStates_label + "-" +
-                   finalStates_label] = np.array(hTs_all)
+        hts_output[initial_states_label + "-" +
+                   final_states_label] = np.array(fpts_all)
         data.append(row)
 
     df = pd.DataFrame(
