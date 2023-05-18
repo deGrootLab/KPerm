@@ -16,7 +16,8 @@ import MDAnalysis as mda
 import pandas as pd
 from scipy.stats import bootstrap
 
-from kperm.permeation import *
+from kperm.permeation import _find_cycles, _compute_trans_prob, _plot_cycle, \
+    _compute_MFPT, _plot_netflux, _count_perm_cross
 from kperm.utils import write_list_of_tuples
 
 
@@ -822,28 +823,30 @@ based on cross are used."
 
         self.stats = stats
 
-    def findCycles(self, node=None, n_bs_jump=4):
-        if node is None:
-            raise ValueError(
-                "The name of the state in in which the cycles start \
-and end is required."
+    def findCycles(self, cycle_state, n_jump_per_cycle=5):
+        if len(cycle_state) == 4:
+            cycles, perm_idx_all, cycle_count_perc = _find_cycles(
+                self.occupancy_4_all, self.jumps_all, cycle_state,
+                n_jump_per_cycle=n_jump_per_cycle
             )
-        elif len(node) == 4:
-            self.cycles_all, self.permeation_idx_all, cycle_perc = findCycles(
-                self.occupancy_4_all, self.jumps_all, node, n_bs_jump=n_bs_jump
+
+            self.cycles_all = cycles
+            self.permeation_idx_all = perm_idx_all
+        elif len(cycle_state) == 6:
+            cycles, perm_idx_all, cycle_count_perc = _find_cycles(
+                self.occupancy_6_all, self.jumps_all, cycle_state,
+                n_jump_per_cycle=n_jump_per_cycle
             )
-        elif len(node) == 6:
-            self.cycles_all, self.permeation_idx_all, cycle_perc = findCycles(
-                self.occupancy_6_all, self.jumps_all, node, n_bs_jump=n_bs_jump
-            )
+
+            self.cycles_all = cycles
+            self.permeation_idx_all = perm_idx_all
         else:
             raise ValueError("Input invalid.")
 
         cycles_flattened = [c for cycle in self.cycles_all for c in cycle]
-        # probs: dict, key=state, value=(target state, %, count)
-        self.cycleProbs_6 = computeTransProb(cycles_flattened, quiet=True)
+        self.cycleProbs_6 = _compute_trans_prob(cycles_flattened, quiet=True)
 
-        return cycle_perc
+        return cycle_count_perc
 
     def plotCycles(
         self,
@@ -855,7 +858,7 @@ and end is required."
         returnCycleProb=True,
         returnMainPath=True,
     ):
-        self.cycleProbs_6, self.mainPath = plotCycles(
+        self.cycleProbs_6, self.mainPath = _plot_cycle(
             self.cycles_all,
             state_threshold=state_threshold,
             label_threshold=label_threshold,
@@ -870,7 +873,7 @@ and end is required."
         self,
         dt=0.02,
         paths=None,
-        n_bs_jump=4,
+        n_jump_per_cycle=5,
         backward=False,
         batch=10000,
         n_resamples=10000,
@@ -880,22 +883,22 @@ and end is required."
                 "Paths are required to compute the mean first passage time."
             )
         elif len(paths[0][0][0]) == 4:
-            mfpt, fps = permeationMFPT(
+            mfpt, fps = _compute_MFPT(
                 self.occupancy_4_all,
                 self.jumps_all,
                 paths,
-                n_bs_jump=n_bs_jump,
+                n_jump_per_cycle=n_jump_per_cycle,
                 dt=dt,
                 backward=backward,
                 batch=batch,
                 n_resamples=n_resamples,
             )
         elif len(paths[0][0][0]) == 6:
-            mfpt, fps = permeationMFPT(
+            mfpt, fps = _compute_MFPT(
                 self.occupancy_6_all,
                 self.jumps_all,
                 paths,
-                n_bs_jump=n_bs_jump,
+                n_jump_per_cycle=n_jump_per_cycle,
                 dt=dt,
                 backward=backward,
                 batch=batch,
@@ -907,7 +910,7 @@ and end is required."
 
     def plotNetFlux(self, weight_threshold=0.1, save=None,
                     returnGraphData=False):
-        return plotNetFlux(
+        return _plot_netflux(
             self.occupancy_6_all,
             weight_threshold,
             save=save,
@@ -1045,10 +1048,10 @@ Check log file for details.", len(double_occ))
         )  # unit: pA
 
     if "cross" in perm_count:
-        kperm_traj, kperm_up, kperm_down = permeationCount_cross(
+        kperm_traj, kperm_up, kperm_down = _count_perm_cross(
             k_occupancy, group1=[0, 1, 2], group2=[3, 4, 5]
         )
-        wperm_traj, wperm_up, wperm_down = permeationCount_cross(
+        wperm_traj, wperm_up, wperm_down = _count_perm_cross(
             w_occupancy, group1=[0, 1, 2], group2=[3, 4, 5]
         )
 

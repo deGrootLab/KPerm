@@ -12,7 +12,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 
 
-def permeationCount_cross(occupancy, group1=[0, 1, 2], group2=[3, 4, 5]):
+def _count_perm_cross(occupancy, group1=[0, 1, 2], group2=[3, 4, 5]):
     """Identify permeation events crossing the S2/S3 plane
 
     Parameters
@@ -28,9 +28,9 @@ def permeationCount_cross(occupancy, group1=[0, 1, 2], group2=[3, 4, 5]):
 
     Returns
     -------
-    permeationTraj: narray
+    perm_traj: narray
         array of the same shape as occupancy, containing net number of
-        permeation events in each frame t. permeationTraj[t] > 0 refers to
+        permeation events in each frame t. perm_traj[t] > 0 refers to
         a net number of upward permeation events at time t.
     perm_up: list of tuples
         list of the same length as occupancy. Each tuple (t, i) contains
@@ -41,131 +41,53 @@ def permeationCount_cross(occupancy, group1=[0, 1, 2], group2=[3, 4, 5]):
         the time t at which a permeant object of the index i crosses the plane
         downward, towards the intracellular side.
     """
-    permeationTraj = np.zeros(len(occupancy), dtype=int)
-    permeationObjects = dict()
+    perm_traj = np.zeros(len(occupancy), dtype=int)
+    permeating_objects = dict()
     perm_up = []
     perm_down = []
 
     for t, occ in enumerate(occupancy):
         for site in group1:
             for index in occ[site]:
-                if index not in permeationObjects.keys():
-                    permeationObjects[index] = 1
-                elif permeationObjects[index] == 1:
+                if index not in permeating_objects.keys():
+                    permeating_objects[index] = 1
+                elif permeating_objects[index] == 1:
                     continue
-                elif permeationObjects[index] == 2:
+                elif permeating_objects[index] == 2:
                     # from group 2 to group 1, so it's an upward flow
-                    permeationObjects[index] = 1
-                    permeationTraj[t] += 1
+                    permeating_objects[index] = 1
+                    perm_traj[t] += 1
 
                     perm_up.append((t, index))
 
         for site in group2:
             for index in occ[site]:
-                if index not in permeationObjects.keys():
-                    permeationObjects[index] = 2
-                elif permeationObjects[index] == 2:
+                if index not in permeating_objects.keys():
+                    permeating_objects[index] = 2
+                elif permeating_objects[index] == 2:
                     continue
-                elif permeationObjects[index] == 1:
+                elif permeating_objects[index] == 1:
                     # from group 1 to group 2, so it's a downward flow
-                    permeationObjects[index] = 2
-                    permeationTraj[t] -= 1
+                    permeating_objects[index] = 2
+                    perm_traj[t] -= 1
 
                     perm_down.append((t, index))
 
-        # iterate over permeationObjects to check if any of the bound objects
+        # iterate over permeating_objects to check if any of the bound objects
         # escape from SF, remove them if they have escaped
-        indices = list(permeationObjects.keys())
+        indices = list(permeating_objects.keys())
         for index in indices:
             if any([index in occ[site] for site in group1]) or any(
                 [index in occ[site] for site in group2]
             ):
                 continue
             else:
-                permeationObjects.pop(index)
+                permeating_objects.pop(index)
 
-    return permeationTraj, perm_up, perm_down
-
-
-def permeationEventsPartition(occupancy, jump, seedState, n_bs_jump):
-    """partitioning trajectory into permeation events
-
-    Parameters
-    ----------
-    occupancy: array of size N
-        tranjectory expressed in the form of SF occupancy
-
-    jumps: arrays of size (N-1, 2)
-        net jumps for ion and water for all trajectories
-
-    seedState: string
-        the SF occupation state that the cycles start and end in
-
-    n_bs_jump: int
-        # binding sites considered in permeation
-        It is used to compute number of k jumps (n_bs_jump+1) one complete
-        permeation event takes
-
-    Returns
-    -------
-    stationaryPhase_indices: list of tuples
-        index for the start and the end of stationary phases
-    permeationCycle_indices: array of int
-        index for the start and the end of permeation cycles, which are
-        stationary phase
-        (accumulated jump remains as  int((n_bs_jump+1)*i+offset)
-        + conduction phase (accumulated jump increases from
-        int((n_bs_jump+1)*i+offset to int((n_bs_jump+1)*(i+1)+offset)
-    """
-    k_jump = jump[:, 0]
-    # w_jump = jump[:, 1]
-
-    n_k_netjumps = np.sum(jump[:, 0]) // (n_bs_jump + 1)
-
-    # prepend the cumsum with a "0" to align it with occ,
-    # now k_netjump_cum[i] is defined as the accumulated
-    # k net jump before t=i
-    k_netjump_cum = np.zeros(len(k_jump) + 1, dtype=int)
-    k_netjump_cum[1:] = np.cumsum(k_jump)
-
-    # ignore the last state as no jump info is available
-    # and find "seed" with no k and w jump
-    indices = np.argwhere(occupancy[:-1] == seedState).reshape(-1)
-    # 2. finding "seed" with no k and w jump
-    indices = indices[~np.any(jump[indices], axis=1)]
-    seed_idx = indices[0]
-    offset = k_netjump_cum[seed_idx]
-
-    stationaryPhase_indices = []
-    for i in range(n_k_netjumps):
-        indices_i = indices[k_netjump_cum[indices] == int((n_bs_jump + 1) * i
-                                                          + offset)]
-        if len(indices_i) > 0:
-            start_i, end_i = indices_i[0], indices_i[-1]
-            stationaryPhase_indices.append((start_i, end_i))
-        else:
-            stationaryPhase_indices.append(())
-
-    # permeation cycle = stationary phase + conduction phase
-    #                  = start of i-th SP to start of (i+1)-th SP
-    permeationCycle_indices = []
-    for i in range(len(stationaryPhase_indices) - 1):
-        try:
-            start_i = stationaryPhase_indices[i][0]
-            end_i = stationaryPhase_indices[i + 1][0]
-            permeationCycle_indices.append([start_i, end_i])
-        except:
-            print(f"{i}-th cycle is discarded as {seedState} is not found")
-            continue
-
-    # print(f"Total permeation events: {n_k_netjumps}")
-    # print(f"Identified cycles: {len(permeationCycle_indices)}")
-    permeationCycle_indices = np.array(permeationCycle_indices)
-
-    return stationaryPhase_indices, permeationCycle_indices
+    return perm_traj, perm_up, perm_down
 
 
-def permEventsPartition(occupancy, k_jump, cycle_state, n_bs_jump):
+def _partition_perm_events(occupancy, k_jump, cycle_state, n_jump_per_cycle=5):
     """partitioning trajectory into full permeation cycles
 
     Parameters
@@ -179,16 +101,19 @@ def permEventsPartition(occupancy, k_jump, cycle_state, n_bs_jump):
     cycle_state: string
         the SF occupation state that the cycles start and end in
 
-    n_bs_jump: int
-        # binding sites considered in permeation
-        It is used to compute number of k jumps (n_bs_jump+1) one complete
-        permeation event takes
+    n_jump_per_cycle: int
+        # of ions that constitute a complete permeation cycle.
+        Example:
+            n_jump_per_cycle = 5 if only jumps from or to S1, S2, S3, and S4
+            are considered.
 
     Returns
     -------
     perm_indices: array of int of size (N, 2)
         index for the start and the end of permeation cycles
     """
+
+    assert n_jump_per_cycle > 0, "n_jump_per_cycle should be > 0"
 
     L = len(occupancy)
 
@@ -203,29 +128,34 @@ def permEventsPartition(occupancy, k_jump, cycle_state, n_bs_jump):
             T = 0
             found = False
 
-            while T < L-t-1 and found is False:
-                T = T+1
+            while T < L - t - 1 and found is False:
+                T = T + 1
 
                 if occupancy[t + T] == cycle_state:
                     n_k_jump = np.sum(k_jump[t: t + T])
 
-                    if n_k_jump == 5:
+                    if n_k_jump == n_jump_per_cycle:
                         perm_index_pair = [t, t + T]
                         perm_indices.append(perm_index_pair)
                         found = True
-                    elif n_k_jump <= -5 or n_k_jump >= 10:
+                    elif (
+                        n_k_jump <= -n_jump_per_cycle
+                        or n_k_jump >= 2 * n_jump_per_cycle
+                    ):
                         found = True
-                        print(f"Not returning to {cycle_state}, \
-no cycle is formed")
-            t = t+T-1
-        t = t+1
+                        print(
+                            f"Not returning to {cycle_state}, \
+no cycle is formed"
+                        )
+            t = t + T - 1
+        t = t + 1
 
     perm_indices = np.array(perm_indices)
 
     return perm_indices
 
 
-def cycleReduction(cycle_original, k_jumps_sub, n_bs_jump):
+def _reduce_cycle(cycle_original, k_jumps_sub):
     """Given an uncompressed (involving osciliation between states without net
     jumps) trajectory segment that starts and ends in the same state and
     records one complete permeation event + the associated jump vectors,
@@ -240,16 +170,14 @@ def cycleReduction(cycle_original, k_jumps_sub, n_bs_jump):
     k_jumps_sub: array of size (N, )
         net jumps for ion in the associated cycle_original
 
-    n_bs_jump: int
-        Number of binding sites considered in permeation
-        #(n_bs_jump+1) jumps make one complete permeation cycle
-
     Returns
     -------
     occupancy_compressed: array of size (M, )
         "cleaned" cycle keeping only the first hit states
     """
-    assert cycle_original[0] == cycle_original[-1], "First and last state \
+    assert (
+        cycle_original[0] == cycle_original[-1]
+    ), "First and last state \
 not the same"
 
     T = len(cycle_original)
@@ -272,10 +200,10 @@ not the same"
     return np.array(cycle_reduced + [cycle_reduced[0]])
 
 
-def findCycles(occupancy_all, jumps_all, seedState, n_bs_jump=4):
+def _find_cycles(occupancy_all, jumps_all, seedState, n_jump_per_cycle=5):
     """Given occupancy and jumps of the trajectories, the seed state, and
-    n_bs_jump that define the # BSs in which jumps in and out are considered,
-    give the cycles that start and end in the seed state
+    n_jump_per_cycle that define the # BSs in which jumps in and out are
+    considered, give the cycles that start and end in the seed state.
 
     Parameters
     ----------
@@ -288,10 +216,11 @@ def findCycles(occupancy_all, jumps_all, seedState, n_bs_jump=4):
     seedState: string
         the SF occupation state that the cycles start and end in
 
-    n_bs_jump: int
-        # binding sites considered in permeation
-        It is used to compute number of k jumps (n_bs_jump+1) one complete
-        permeation event takes
+    n_jump_per_cycle: int
+        # of ions that constitute a complete permeation cycle.
+        Example:
+            n_jump_per_cycle = 5 if only jumps from or to S1, S2, S3, and S4
+            are considered.
 
     Returns
     -------
@@ -307,20 +236,18 @@ def findCycles(occupancy_all, jumps_all, seedState, n_bs_jump=4):
     for i, (occupancy, jumps) in enumerate(zip(occupancy_all, jumps_all)):
         print(f"Trajectory {i}")
 
-        p_indices = permEventsPartition(
-            occupancy, jumps, seedState, n_bs_jump=n_bs_jump
+        p_indices = _partition_perm_events(
+            occupancy, jumps, seedState, n_jump_per_cycle=n_jump_per_cycle
         )
         p_indices_all.append(p_indices)
 
         permeationCycles_ = [
-            cycleReduction(
-                occupancy[i: j + 1], jumps[i: j + 1, 0], n_bs_jump=n_bs_jump
-            )
+            _reduce_cycle(occupancy[i: j + 1], jumps[i: j + 1, 0])
             for (i, j) in p_indices
         ]
         permeationCycles.append(permeationCycles_)
 
-        n_k_netjump = np.sum(jumps[:, 0]) // (n_bs_jump + 1)
+        n_k_netjump = np.sum(jumps[:, 0]) // n_jump_per_cycle
         n_identified_cycle = len(p_indices)
 
         n_k_netjumps.append(n_k_netjump)
@@ -328,22 +255,22 @@ def findCycles(occupancy_all, jumps_all, seedState, n_bs_jump=4):
 
         print(f"Number of permeation events: {int(n_k_netjump)}")
         print(
-            f"Number of identified cycles: {n_identified_cycle} \t" +
-            f"{n_identified_cycle/n_k_netjump * 100:.2f}%\n"
+            f"Number of identified cycles: {n_identified_cycle} \t"
+            + f"{n_identified_cycle/n_k_netjump * 100:.2f}%\n"
         )
 
     identified_percentage = np.sum(n_identified_cycles) / np.sum(n_k_netjumps)
 
     print(f"Total number of permeation events: {int(np.sum(n_k_netjumps))}")
     print(
-        f"Total number of identified cycles: {np.sum(n_identified_cycles)}\t" +
-        f" {identified_percentage * 100:.3f}%\n\n"
+        f"Total number of identified cycles: {np.sum(n_identified_cycles)}\t"
+        + f" {identified_percentage * 100:.3f}%\n\n"
     )
 
     return permeationCycles, p_indices_all, identified_percentage
 
 
-def computeTransProb(trajs, return_matrix=False, quiet=False):
+def _compute_trans_prob(trajs, return_matrix=False, quiet=False):
     """given trajectories, compute transition probabilities
 
     Parameters
@@ -442,7 +369,7 @@ def computeTransProb(trajs, return_matrix=False, quiet=False):
         return trans_prob_dict
 
 
-def plotCycles(
+def _plot_cycle(
     cycles,
     state_threshold=0.05,
     label_threshold=0.05,
@@ -478,15 +405,14 @@ def plotCycles(
     n_cycles = len(cycles_flattened)
 
     # probs: dict, key=state, value=(target state, %, count)
-    cycles_dict = computeTransProb(cycles_flattened, quiet=True)
+    cycles_dict = _compute_trans_prob(cycles_flattened, quiet=True)
 
     ############################################################
 
     # find the backbone of the cyclic graph
     states_all = np.array([k for k in cycles_dict.keys()])
-    state_counts = np.array(
-        [cycles_dict[state]["count_out"] for state in states_all]
-        )
+    state_counts = np.array([cycles_dict[state]["count_out"]
+                            for state in states_all])
     state_counts_total = np.sum(state_counts)
     state_p = state_counts / state_counts_total
     states_selected = states_all[state_p > state_threshold]
@@ -505,8 +431,8 @@ def plotCycles(
         backbone.append(state)
 
     # assign the side branches of the cyclic graph
-    non_backbone = states_selected[np.in1d(states_selected,
-                                           backbone, invert=True)]
+    non_backbone = states_selected[np.in1d(
+        states_selected, backbone, invert=True)]
     sidechain = {k: [] for k in backbone}
 
     # put next to the backbone state before the target state which the
@@ -517,7 +443,7 @@ def plotCycles(
             try:
                 j_idx = backbone.index(state_j)
                 break
-            except:
+            except ValueError:
                 continue
         sidechain[backbone[j_idx - 1]].append(state_i)
 
@@ -529,7 +455,8 @@ def plotCycles(
     for state_backbone, states_sidechain in sidechain.items():
         vec = pos[state_backbone] / np.linalg.norm(pos[state_backbone])
         for j, state_sidechain in enumerate(states_sidechain):
-            pos[state_sidechain] = pos[state_backbone]+offset*vec + vec*j*scale
+            pos[state_sidechain] = pos[state_backbone] + \
+                offset * vec + vec * j * scale
 
     ############################################################
     # initialize graph
@@ -537,9 +464,8 @@ def plotCycles(
     _ = plt.axis("equal")
     G = nx.DiGraph()
     G.add_nodes_from(states_selected)
-    sizes = np.array(
-        [cycles_dict[state]["count_out"] for state in states_selected]
-        )
+    sizes = np.array([cycles_dict[state]["count_out"]
+                     for state in states_selected])
 
     nx.draw_networkx(
         G,
@@ -624,8 +550,8 @@ def plotCycles(
         return cycles_dict
 
 
-def hittingTimes(occupancy, jumps, intStates, finalStates, n_bs_jump=4,
-                 backward=False):
+def hittingTimes(occupancy, jumps, intStates,
+                 finalStates, n_jump_per_cycle=5, backward=False):
     """compute hitting time for transition pairs within one permeation event,
         i.e. abs(k_netjumps) < n_bs_jump+1
 
@@ -643,10 +569,11 @@ def hittingTimes(occupancy, jumps, intStates, finalStates, n_bs_jump=4,
     finalStates: list of strings
         the SF occupation state that the transitions end in
 
-    n_bs_jump: int
-        # binding sites considered in permeation
-        It is used to compute number of k jumps (n_bs_jump+1) one complete
-        permeation event takes
+    n_jump_per_cycle: int
+        # of ions that constitute a complete permeation cycle.
+        Example:
+            n_jump_per_cycle = 5 if only jumps from or to S1, S2, S3, and S4
+            are considered.
 
     backward: boolean, False by default
         whether the hitting times corresponding to transitions in which the
@@ -697,19 +624,19 @@ def hittingTimes(occupancy, jumps, intStates, finalStates, n_bs_jump=4,
                     w_netjump = int(np.sum(w_netjumps[start_idx:end_idx]))
 
                 # restrict the scope to transitions within one permeation
-                # event, i.e. 0 <= abs(k_netjump) < (n_bs_jump+1)
+                # event, i.e. 0 <= abs(k_netjump) < n_jump_per_cycle
                 if (
                     (
                         k_netjump >= 0
-                        and k_netjump < (n_bs_jump + 1)
+                        and k_netjump < n_jump_per_cycle
                         and backward is False
                     )
                     or (
                         k_netjump <= 0
-                        and k_netjump > -(n_bs_jump + 1)
+                        and k_netjump > -n_jump_per_cycle
                         and backward is True
                     )
-                    or n_bs_jump == 0
+                    or n_jump_per_cycle == 0
                 ):
                     hittingTime = end_idx - start_idx
                     fps.append(hittingTime)
@@ -723,11 +650,11 @@ def hittingTimes(occupancy, jumps, intStates, finalStates, n_bs_jump=4,
     return fps, k_netjumps_counts, w_netjumps_counts
 
 
-def permeationMFPT(
+def _compute_MFPT(
     occupancy_all,
     jumps_all,
     pairs,
-    n_bs_jump=4,
+    n_jump_per_cycle=5,
     dt=0.02,
     backward=False,
     batch=10000,
@@ -749,10 +676,11 @@ def permeationMFPT(
         pairs[i][1] is the list containing all strings of final states
         in the i-th transition pair
 
-    n_bs_jump: int
-        # binding sites considered in permeation
-        It is used to compute number of k jumps (n_bs_jump+1) one complete
-        permeation event takes
+    n_jump_per_cycle: int
+        # of ions that constitute a complete permeation cycle.
+        Example:
+            n_jump_per_cycle = 5 if only jumps from or to S1, S2, S3, and S4
+            are considered.
 
     dt: float
         lag time in ns
@@ -777,7 +705,7 @@ def permeationMFPT(
                 jumps,
                 initialStates,
                 finalStates,
-                n_bs_jump=n_bs_jump,
+                n_jump_per_cycle=n_jump_per_cycle,
                 backward=backward,
             )
             hTs_all += hTs
@@ -821,9 +749,8 @@ def permeationMFPT(
             w_j_counts_all_mean,
         ]
 
-        hts_output[inititalStates_label+"-"+finalStates_label] = np.array(
-            hTs_all
-            )
+        hts_output[inititalStates_label + "-" +
+                   finalStates_label] = np.array(hTs_all)
         data.append(row)
 
     df = pd.DataFrame(
@@ -842,8 +769,8 @@ def permeationMFPT(
     return df, hts_output
 
 
-def plotNetFlux(occupancy_all, weight_threshold=0.1, save=None,
-                returnGraphData=False):
+def _plot_netflux(occupancy_all, weight_threshold=0.1,
+                  save=None, returnGraphData=False):
     """plot net fluxes
 
     Parameters
@@ -879,15 +806,15 @@ def plotNetFlux(occupancy_all, weight_threshold=0.1, save=None,
 
     node_size_multiplier = 1000
 
-    prob_dict, prob_matrix, s2i, i2s = computeTransProb(
+    prob_dict, prob_matrix, s2i, i2s = _compute_trans_prob(
         occupancy_all, return_matrix=True, quiet=True
     )
     n_states = len(prob_matrix)
-    state_probs = np.array(
-        [prob_dict[i2s[i]]["prob"] for i in range(n_states)]
-        )
+    state_probs = np.array([prob_dict[i2s[i]]["prob"]
+                           for i in range(n_states)])
     netflux = (
-        np.diag(state_probs)@prob_matrix - (np.diag(state_probs)@prob_matrix).T
+        np.diag(state_probs) @ prob_matrix -
+        (np.diag(state_probs) @ prob_matrix).T
     )
 
     edges_weights_full = {}
@@ -899,9 +826,8 @@ def plotNetFlux(occupancy_all, weight_threshold=0.1, save=None,
         (s1, s2): w for (s1, s2), w in edges_weights_full.items() if w > 0.0
     }
 
-    states_probs_full = {
-        i2s[i]: prob_dict[i2s[i]]["prob"] for i in range(n_states)
-        }
+    states_probs_full = {i2s[i]: prob_dict[i2s[i]]["prob"]
+                         for i in range(n_states)}
 
     DG = nx.DiGraph()
 
@@ -922,8 +848,8 @@ def plotNetFlux(occupancy_all, weight_threshold=0.1, save=None,
 
     # draw
     _ = nx.draw_networkx_nodes(
-        DG, pos, node_color="orange", linewidths=0, node_size=node_size,
-        alpha=0.5
+        DG, pos, node_color="orange",
+        linewidths=0, node_size=node_size, alpha=0.5
     )
     _ = nx.draw_networkx_labels(DG, pos)
     _ = nx.draw_networkx_edges(
