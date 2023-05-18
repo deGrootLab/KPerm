@@ -225,56 +225,6 @@ no cycle is formed")
     return perm_indices
 
 
-def cycleCompression_old(occupancy_cycle, k_jumps_sub, n_bs_jump):
-    """Given an uncompressed (involving osciliation between states without net
-    jumps) trajectory segment that starts and ends in the same state and
-    records one complete permeation event + the associated jump vectors,
-    compute the "cleaned" cycle keeping only the first hit states.
-
-    Parameters
-    ----------
-    occupancy_cycle: array of size (N, )
-        occupancy for a trajectory segment
-
-    k_jumps_sub: array of size (N, )
-        net jumps for ion in the associated occupancy_cycle
-
-    n_bs_jump: int
-        Number of binding sites considered in permeation
-        #(n_bs_jump+1) jumps make one complete permeation cycle
-
-    Returns
-    -------
-    occupancy_compressed: array of size (M, )
-        "cleaned" cycle keeping only the first hit states
-    """
-    _, idx = np.unique(occupancy_cycle, return_index=True)
-    unique = occupancy_cycle[np.sort(idx)]
-
-    for state in unique:
-        keep = np.ones(len(occupancy_cycle), dtype=bool)
-        indices = np.argwhere(occupancy_cycle == state).reshape(-1)
-
-        for i in range(len(indices) - 1):
-            start_i = indices[i]
-            end_i = indices[i + 1]
-            k_netjumps_i = k_jumps_sub[start_i:end_i]
-
-            # discard if the state repeats itself without net ion jump
-            if (end_i - start_i) > 0 and np.sum(k_netjumps_i) == 0:
-                keep[start_i:end_i] = False
-
-        occupancy_cycle = occupancy_cycle[keep]
-        k_jumps_sub = k_jumps_sub[keep]
-
-    occupancy_compressed = occupancy_cycle
-    k_jumps_compressed = k_jumps_sub
-
-    if np.sum(k_jumps_compressed) != (n_bs_jump + 1):
-        print(f"netjump != {(n_bs_jump+1)}")
-    return occupancy_compressed
-
-
 def cycleReduction(cycle_original, k_jumps_sub, n_bs_jump):
     """Given an uncompressed (involving osciliation between states without net
     jumps) trajectory segment that starts and ends in the same state and
