@@ -33,7 +33,7 @@ def countTime(func):
     return _time_it
 
 
-def createLogger(loc):
+def create_logger(loc):
     # remove existing handlers, if any
     logger = logging.getLogger("kchannel")
     logger.handlers = []
@@ -83,7 +83,6 @@ def detectSF(coor, quiet=False, o_cutoff=5, og1_cutoff=7.0, allRes=False):
     u = mda.Universe(coor, in_memory=False)
 
     # Finding backbone oxygen atoms that meet the geometric requirements
-    # TODO: devise better geometric criteria for finding residues forming SF
     if allRes:
         protein_o = u.select_atoms("protein and name O", updating=False)
     else:
@@ -165,7 +164,6 @@ def detectSF(coor, quiet=False, o_cutoff=5, og1_cutoff=7.0, allRes=False):
         updating=False,
     )
 
-    # TODO: assigning binding sites based on atoms' coordinates?
     sf_layer = {"O": {}, "CA": {}}
     for sf_atom, name in zip([sf_o, sf_ca], ["O", "CA"]):
         # number of layer = # atoms // 4
@@ -246,14 +244,8 @@ def getNonProteinIndex(coor):
     return indices
 
 
-def findBound(
-    positions,
-    sol_indices,
-    sf_o_indices,
-    additional_bs_cutoff=4.0,
-    BScenter_cutoff=4.0,
-    d_min_outer_cutoff=4.0,
-):
+def findBound(positions, sol_indices, sf_o_indices, additional_bs_cutoff=4.0,
+              BScenter_cutoff=4.0):
     """read solute (K) or solvent (water) positions and assign their
     (zero-based) indicies to binding sites
 
@@ -280,7 +272,7 @@ def findBound(
         determining if particle is occupying.
         one of the BSs
     d_min_outer_cutoff: float
-        threshold distance in Angstrom for determining if the particle is 
+        threshold distance in Angstrom for determining if the particle is
         touching and thus occupying outer (the first or the last binding sites)
         BSs.
 
@@ -367,7 +359,7 @@ def checkFlips(pos_all, sf_o_idx, cutoff=5):
     Returns
     -------
     flips: array
-        number of flips in each layer. flips[0] is the # flips for the first 
+        number of flips in each layer. flips[0] is the # flips for the first
         layer
     """
     flips = np.zeros(len(sf_o_idx), dtype=int)
@@ -392,7 +384,7 @@ def computeSFAtomDistance(pos_all, sf_atom_idx):
     pos_all : narray
         positions of all atoms in the system
     sf_atom_idx : narray
-        indices for atoms of interest in each layer. The first index and 
+        indices for atoms of interest in each layer. The first index and
         second index are in opposite pair. Same for the third and the fourth.
 
     Returns
@@ -400,13 +392,12 @@ def computeSFAtomDistance(pos_all, sf_atom_idx):
     d: array
         all computed diagonal distances
     """
-    d = []
-    for layer_id, indices in enumerate(sf_atom_idx):
+    diag_distances = []
+    for _, indices in enumerate(sf_atom_idx):
         pos = pos_all[indices]
-        d.append(np.linalg.norm(pos[0] - pos[1]))
-        d.append(np.linalg.norm(pos[2] - pos[3]))
-    d = np.array(d)
-    return d
+        diag_distances.append(np.linalg.norm(pos[0] - pos[1]))
+        diag_distances.append(np.linalg.norm(pos[2] - pos[3]))
+    return np.array(diag_distances)
 
 
 def computeOccupancy_6BS(k_occ_whole, w_occ_whole, bs_ignore=[0, 5]):
@@ -531,18 +522,12 @@ def computeJump_6BS(occ_t0, occ_t1, t0=0.0):
             new_pos = [i for (i, bs_t1) in enumerate(
                 occ_t1) if sol_i_t0 in bs_t1]
             if len(new_pos) > 1:
-                print(
-                    f"At time {time}, same solvent/solute is identified more \
-than once"
-                )
-                raise Exception
+                raise AttributeError(f"At time {t0}, same solvent/solute \
+is identified more than once")
             elif len(new_pos) == 0:
                 if bs_i_t0 == 2 or bs_i_t0 == 3:
-                    print(
-                        f"At step {t0}, new position of idx {sol_i_t0} in \
-S{bs_i_t0} cannot be found, jump too much?"
-                    )
-                    raise Exception
+                    raise AttributeError(f"At step {t0}, new position of idx \
+{sol_i_t0} in S{bs_i_t0} cannot be found, jump too much?")
                 elif bs_i_t0 == 0 or bs_i_t0 == 1:
                     # assume it has escaped through S0, so set it beyond S0
                     new_pos_idx = 0
@@ -557,8 +542,9 @@ S{bs_i_t0} cannot be found, jump too much?"
             if sol_i_t0 not in checked:
                 checked.append(sol_i_t0)
             else:
-                print(f"At step {time}, {sol_i_t0} was found twice")
-                raise Exception
+                raise AttributeError(
+                    f"At step {t0}, {sol_i_t0} was found twice"
+                    )
 
     for bs_i_t1, bs_t1 in enumerate(occ_t1):
         for sol_i_t1 in bs_t1:
@@ -566,11 +552,8 @@ S{bs_i_t0} cannot be found, jump too much?"
                 continue
             else:
                 if bs_i_t1 == 2 or bs_i_t1 == 3:
-                    print(
-                        f"At step {t0+1}, history of idx {sol_i_t1} which is \
-found in S2/S3 cannot be traced, jump too much?"
-                    )
-                    raise Exception
+                    raise AttributeError(f"At step {t0+1}, history of idx \
+{sol_i_t1} which is found in S2/S3 cannot be traced, jump too much?")
                 elif bs_i_t1 == 0 or bs_i_t1 == 1:
                     # assume it has entered through S0, so set it at S0 to
                     # ignore jump between extracellular region and S0
@@ -634,8 +617,8 @@ class Channel:
             self.results_loc = results_loc
 
         for result_loc in self.results_loc:
-            print(
-                f"reading results from {result_loc}/{inputName} ...", end=" ")
+            print(f"loading results from {result_loc}/{inputName} ...",
+                  end=" ")
             result_path = os.path.abspath(
                 os.path.join(result_loc, inputName + ".csv"))
             log_path = os.path.abspath(
@@ -650,7 +633,7 @@ class Channel:
             occupancy_4_all.append(occ_4)
             jumps_all.append(jumps)
 
-            with open(log_path, "r") as f:
+            with open(log_path, "r", encoding="utf-8") as f:
                 log = f.read()
             total_time = float(
                 re.search(r"Total time\D+(\d+\.\d+)", log).group(1))
@@ -661,32 +644,32 @@ class Channel:
 
             try:
                 n_k_jump = re.search(
-                    r"Number of net ion permeation events \(jump\) = " +
+                    r"net ion permeation events \(jump\) = " +
                     r"([-+]?\d+|N/A)",
                     log,
                 ).group(1)
                 n_w_jump = re.search(
-                    r"Number of net water permeation events \(jump\) = " +
+                    r"net water permeation events \(jump\) = " +
                     r"([-+]?\d+|N/A)",
                     log,
                 ).group(1)
-                current_jump = re.search(
-                    r"Current \(jump\) = ([-+]?\d+\.\d+|N/A)",
+                k_current_jump = re.search(
+                    r"[cC]urrent \(jump\) = ([-+]?\d+\.\d+|N/A)",
                     log
                 ).group(1)
 
                 n_k_cross = re.search(
-                    r"Number of net ion permeation events \(cross\) = " +
+                    r"net ion permeation events \(cross\) = " +
                     r"([-+]?\d+|N/A)",
                     log,
                 ).group(1)
                 n_w_cross = re.search(
-                    r"Number of net water permeation events \(cross\) = " +
+                    r"net water permeation events \(cross\) = " +
                     r"([-+]?\d+|N/A)",
                     log,
                 ).group(1)
-                current_cross = re.search(
-                    r"Current \(cross\) = ([-+]?\d+\.\d+|N/A)",
+                k_current_cross = re.search(
+                    r"[cC]urrent \(cross\) = ([-+]?\d+\.\d+|N/A)",
                     log
                 ).group(1)
 
@@ -700,23 +683,23 @@ class Channel:
                     r"Number of net water permeation events = ([-+]?\d+|N/A)",
                     log
                 ).group(1)
-                current_jump = re.search(
-                    r"Current = ([-+]?\d+\.\d+|N/A)", log).group(1)
+                k_current_jump = re.search(
+                    r"[cC]urrent = ([-+]?\d+\.\d+|N/A)", log).group(1)
 
                 n_k_cross = "N/A"
                 n_w_cross = "N/A"
-                current_cross = "N/A"
+                k_current_cross = "N/A"
 
             if n_k_jump != "N/A":
                 n_k_events.append(int(n_k_jump))
                 n_water_events.append(int(n_w_jump))
-                currents.append(float(current_jump))
+                currents.append(float(k_current_jump))
                 print("permeation counts based on jumps are used.")
 
             elif n_k_cross != "N/A":
                 n_k_events.append(int(n_k_cross))
                 n_water_events.append(int(n_w_cross))
-                currents.append(float(current_cross))
+                currents.append(float(k_current_cross))
                 print(
                     "permeation counts based on jumps are not found, counts \
 based on cross are used."
@@ -769,16 +752,16 @@ based on cross are used."
             current_bs_l, current_bs_h = current_bs.confidence_interval
             self.current = (np.mean(self.currents), current_bs_l, current_bs_h)
             print(
-                f"Current (pA): {self.current[0]:.3f}\t" +
+                f"K+ Current (pA): {self.current[0]:.3f}\t" +
                 f"{current_bs_l:.3f} - {current_bs_h:.3f}"
                 )
-        except:
+        except ValueError:
             self.current = (
                 np.mean(self.currents),
                 np.mean(self.currents),
                 np.mean(self.currents),
             )
-            print(f"Current (pA): {self.current[0]:.3f}")
+            print(f"K+ Current (pA): {self.current[0]:.3f}")
 
         states, counts = np.unique(
             np.concatenate(self.occupancy_6_all), return_counts=True
@@ -816,7 +799,7 @@ based on cross are used."
                 p_l, p_u = p_bs.confidence_interval
                 p_ls.append(p_l)
                 p_us.append(p_u)
-            except:
+            except ValueError:
                 p_ls.append(p_mean)
                 p_us.append(p_mean)
 
@@ -942,14 +925,13 @@ def run(
     sf_idx=None,
     SFScanAllRes=False,
     CADistance=False,
-    pairwise=False,
     BScenter_cutoff=4.0,
 ):
     path = os.path.dirname(traj)
 
     log_loc = os.path.abspath(os.path.join(path, output + ".log"))
 
-    logger = createLogger(log_loc)
+    logger = create_logger(log_loc)
 
     print(f"Reading coordinate {coor}\nReading trajectory {traj}")
     u = mda.Universe(coor, traj, in_memory=False)
@@ -962,7 +944,7 @@ def run(
     sf_ca_idx = np.array([sf_idx["CA"][i]["idx"]
                          for i in range(len(sf_idx["CA"]))])
 
-    k_idx, cl_idx, water_idx = getNonProteinIndex(coor)
+    k_idx, _, water_idx = getNonProteinIndex(coor)
 
     k_occupancy = []
     w_occupancy = []
@@ -1037,19 +1019,16 @@ def run(
     )
     if len(double_occ) > 0:
         logger.info(
-            f"Double occupancy for S1/S2/S3/S4 is found in {len(double_occ)} \
-frames. Check log file for details."
-        )
+            "Double occupancy in S1/S2/S3/S4 is found in %d frames. \
+Check log file for details.", len(double_occ))
         for t, i in double_occ:
-            logger.debug(f"In frame {t}, double occupancy is found in S{i}")
+            logger.debug("In frame %d, double occupancy is found in S%d",
+                         t, i)
 
-    n_k_netjumps = "N/A"
-    n_w_netjumps = "N/A"
-    current_jump = "N/A"
-
-    n_net_k_cross = "N/A"
-    n_net_w_cross = "N/A"
-    current_cross = "N/A"
+    n_net_k_jump, n_net_w_jump, k_current_jump = "N/A", "N/A", "N/A"
+    n_net_k_cross, n_net_w_cross, k_current_cross = "N/A", "N/A", "N/A"
+    n_up_k_cross, n_down_k_cross = "N/A", "N/A"
+    n_up_w_cross, n_down_w_cross = "N/A", "N/A"
 
     if "jump" in perm_count:
         jumps[: len(k_occupancy) -
@@ -1057,11 +1036,12 @@ frames. Check log file for details."
         k_j_sum = np.sum(jumps[:, 0])
         w_j_sum = np.sum(jumps[:, 1])
 
-        n_k_netjumps = int(np.fix(k_j_sum / 5))
-        n_w_netjumps = int(np.fix(w_j_sum / 5))
+        n_net_k_jump = int(np.fix(k_j_sum / 5))
+        n_net_w_jump = int(np.fix(w_j_sum / 5))
 
-        current_jump = (
-            n_k_netjumps * 1.602e-19 / (u.trajectory.totaltime * 1e-12) * 1e12
+        k_current_jump = round(
+            n_net_k_jump * 1.602e-19 / (u.trajectory.totaltime * 1e-12) * 1e12,
+            6
         )  # unit: pA
 
     if "cross" in perm_count:
@@ -1090,36 +1070,31 @@ frames. Check log file for details."
         n_up_w_cross = len(wperm_up)
         n_down_w_cross = len(wperm_down)
 
-        current_cross = (
-            n_net_k_cross * 1.602e-19 / (u.trajectory.totaltime * 1e-12) * 1e12
+        k_current_cross = round(
+            n_net_k_cross * 1.602e-19 / (u.trajectory.totaltime*1e-12) * 1e12,
+            6
         )  # unit: pA
 
     logger.info("=================================")
-    logger.info(f"Total time: {u.trajectory.totaltime/1e3:.6f} ns")
-    logger.info(f"dt: {u.trajectory.dt/1e3:.6f} ns")
-    logger.info(f"Number of K+: {len(k_idx)}")
-    logger.info(f"Number of water: {len(water_idx)}")
-    logger.info(f"Number of net ion permeation events (jump) = {n_k_netjumps}")
-    logger.info(
-        f"Number of net water permeation events (jump) = {n_w_netjumps}")
-    logger.info(f"Current (jump) = {current_jump} pA")
-    logger.info(
-        f"Number of upward ion permeation events (cross) = {n_up_k_cross}")
-    logger.info(
-        f"Number of downward ion permeation events (cross) = {n_down_k_cross}"
-    )
-    logger.info(
-        f"Number of net ion permeation events (cross) = {n_net_k_cross}")
-    logger.info(
-        f"Number of upward water permeation events (cross) = {n_up_w_cross}"
-    )
-    logger.info(
-        "Number of downward water permeation events (cross) = " +
-        f"{n_down_w_cross}"
-    )
-    logger.info(
-        f"Number of net water permeation events (cross) = {n_net_w_cross}")
-    logger.info(f"Ion Current (cross) = {current_cross} pA")
+    logger.info("Total time: %.3f ns", u.trajectory.totaltime/1e3)
+    logger.info("dt: %.4f ns", u.trajectory.dt/1e3)
+    logger.info("# of K+: %d", len(k_idx))
+    logger.info("# of water: %d\n", len(water_idx))
+
+    logger.info("# of upward ion permeation events (cross) = %s", n_up_k_cross)
+    logger.info("# of downward ion permeation events (cross) = %s",
+                n_down_k_cross)
+    logger.info("# of net ion permeation events (cross) = %s", n_net_k_cross)
+    logger.info("# of upward water permeation events (cross) = %s",
+                n_up_w_cross)
+    logger.info("# of downward water permeation events (cross) = %s",
+                n_down_w_cross)
+    logger.info("# of net water permeation events (cross) = %s", n_net_w_cross)
+    logger.info("K+ current (cross) = %s pA\n", k_current_cross)
+
+    logger.info("# of net ion permeation events (jump) = %s", n_net_k_jump)
+    logger.info("# of net water permeation events (jump) = %s", n_net_w_jump)
+    logger.info("K+ current (jump) = %s pA\n", k_current_jump)
 
     if CADistance:
         data = np.hstack(
@@ -1145,8 +1120,8 @@ frames. Check log file for details."
     data_loc = os.path.abspath(os.path.join(path, output + ".csv"))
     data = pd.DataFrame(data, columns=columns)
     data.to_csv(data_loc)
-    logger.info(f"Results saved to {data_loc}")
-    logger.info(f"Log saved to {log_loc}")
+    logger.info("Results saved to %s", data_loc)
+    logger.info("Log saved to %s", log_loc)
     logger.info("=================================")
 
     # remove all handlers to avoid multiple logging
