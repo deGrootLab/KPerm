@@ -9,6 +9,7 @@ import os
 import logging
 import sys
 import re
+import warnings
 from functools import wraps
 
 import numpy as np
@@ -19,6 +20,8 @@ from scipy.stats import bootstrap
 from kperm.permeation import _find_cycles, _compute_trans_prob, _plot_cycle, \
     _compute_mfpt, _plot_netflux, _count_perm_cross
 from kperm.utils import write_list_of_tuples
+
+warnings.simplefilter('always', DeprecationWarning)
 
 
 class Channel:
@@ -174,7 +177,7 @@ based on cross are used."
         self.n_water_events = n_water_events
         self.n_k_events = n_k_events
 
-    def computeStats(self):
+    def compute_stats(self):
         """
         Parameters
         ----------
@@ -280,7 +283,15 @@ based on cross are used."
 
         self.stats = stats
 
-    def findCycles(self, cycle_state, n_jump_per_cycle=5):
+    def computeStats(self, *args, **kwargs):
+        warnings.warn(
+            "computeStats() is renamed to compute_stats(). " +
+            "You are recommended to call <Channel>.compute_stats() instead. " +
+            "computeStats() will be removed in the future.",
+            DeprecationWarning)
+        return self.compute_stats(*args, **kwargs)
+
+    def find_cycle(self, cycle_state, n_jump_per_cycle=5):
         if len(cycle_state) == 4:
             cycles, perm_idx_all, cycle_count_perc = _find_cycles(
                 self.occupancy_4_all, self.jumps_all, cycle_state,
@@ -305,7 +316,23 @@ based on cross are used."
 
         return cycle_count_perc
 
-    def plotCycles(
+    def findCycles(self, *args, **kwargs):
+        warnings.warn(
+            "findCycles() is renamed to find_cycle(). " +
+            "You are recommended to call <Channel>.find_cycle() instead. " +
+            "findCycles() will be removed in the future.",
+            DeprecationWarning)
+        return self.find_cycle(*args, **kwargs)
+
+    def plotCycles(self, *args, **kwargs):
+        warnings.warn(
+            "plotCycles() is renamed to plot_cycle(). " +
+            "You are recommended to call <Channel>.plot_cycle() instead. " +
+            "plotCycles() will be removed in the future.",
+            DeprecationWarning)
+        return self.plot_cycle(*args, **kwargs)
+
+    def plot_cycle(
         self,
         state_threshold=0.01,
         label_threshold=0.15,
@@ -326,7 +353,15 @@ based on cross are used."
             returnMainPath=returnMainPath,
         )
 
-    def permeationMFPT(
+    def permeationMFPT(self, *args, **kwargs):
+        warnings.warn(
+            "permeationMFPT() is renamed to mfpt(). " +
+            "You are recommended to call <Channel>.mfpt() instead. " +
+            "permeationMFPT() will be removed in the future.",
+            DeprecationWarning)
+        return self.mfpt(*args, **kwargs)
+
+    def mfpt(
         self,
         dt=0.02,
         paths=None,
@@ -339,7 +374,8 @@ based on cross are used."
             raise ValueError(
                 "Paths are required to compute the mean first passage time."
             )
-        elif len(paths[0][0][0]) == 4:
+
+        if len(paths[0][0][0]) == 4:
             mfpt, fps = _compute_mfpt(
                 self.occupancy_4_all,
                 self.jumps_all,
@@ -365,8 +401,16 @@ based on cross are used."
             raise ValueError("paths invalid.")
         return mfpt, fps
 
-    def plotNetFlux(self, weight_threshold=0.1, save=None,
-                    returnGraphData=False):
+    def plotNetFlux(self, *args, **kwargs):
+        warnings.warn(
+            "plotNetFlux() is renamed to plot_netflux(). " +
+            "You are recommended to call <Channel>.plot_netflux() instead. " +
+            "plotNetFlux() will be removed in the future.",
+            DeprecationWarning)
+        return self.plot_netflux(*args, **kwargs)
+
+    def plot_netflux(self, weight_threshold=0.1, save=None,
+                     returnGraphData=False):
         return _plot_netflux(
             self.occupancy_6_all,
             weight_threshold,
@@ -407,7 +451,16 @@ def create_logger(loc):
     return logger
 
 
-def detectSF(coor, quiet=False, o_cutoff=5, og1_cutoff=7.0, allRes=False):
+def detectSF(*args, **kwargs):
+    warnings.warn(
+        "detectSF() is renamed to detect_sf(). " +
+        "You are recommended to call detect_sf() instead. " +
+        "detectSF() will be removed in the future.",
+        DeprecationWarning)
+    return detect_sf(*args, **kwargs)
+
+
+def detect_sf(coor, quiet=False, o_cutoff=5, og1_cutoff=7.0, allRes=False):
     """read coordinate file and return zero-indexed atom indices defining SF
 
     Parameters
@@ -944,7 +997,7 @@ def run(
     u = mda.Universe(coor, traj, in_memory=False)
 
     if sf_idx is None:
-        sf_idx = detectSF(coor, quiet=True, allRes=sf_all_res)
+        sf_idx = detect_sf(coor, quiet=True, allRes=sf_all_res)
 
     sf_o_idx = np.array([sf_idx["O"][i]["idx"]
                         for i in range(len(sf_idx["O"]))])
