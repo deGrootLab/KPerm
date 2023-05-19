@@ -1110,22 +1110,27 @@ Check log file for details.", len(double_occ))
     logger.info("=================================")
     logger.info("Total time: %.3f ns", u.trajectory.totaltime/1e3)
     logger.info("dt: %.4f ns", u.trajectory.dt/1e3)
-    logger.info("# of K+: %d", len(k_idx))
-    logger.info("# of water: %d\n", len(water_idx))
+    logger.info("Number of K+: %d", len(k_idx))
+    logger.info("Number of water: %d\n", len(water_idx))
 
-    logger.info("# of upward ion permeation events (cross) = %s", n_up_k_cross)
-    logger.info("# of downward ion permeation events (cross) = %s",
+    logger.info("Number of upward ion permeation events (cross) = %s",
+                n_up_k_cross)
+    logger.info("Number of downward ion permeation events (cross) = %s",
                 n_down_k_cross)
-    logger.info("# of net ion permeation events (cross) = %s", n_net_k_cross)
-    logger.info("# of upward water permeation events (cross) = %s",
+    logger.info("Number of net ion permeation events (cross) = %s",
+                n_net_k_cross)
+    logger.info("Number of upward water permeation events (cross) = %s",
                 n_up_w_cross)
-    logger.info("# of downward water permeation events (cross) = %s",
+    logger.info("Number of downward water permeation events (cross) = %s",
                 n_down_w_cross)
-    logger.info("# of net water permeation events (cross) = %s", n_net_w_cross)
+    logger.info("Number of net water permeation events (cross) = %s",
+                n_net_w_cross)
     logger.info("K+ current (cross) = %s pA\n", k_current_cross)
 
-    logger.info("# of net ion permeation events (jump) = %s", n_net_k_jump)
-    logger.info("# of net water permeation events (jump) = %s", n_net_w_jump)
+    logger.info("Number of net ion permeation events (jump) = %s",
+                n_net_k_jump)
+    logger.info("Number of net water permeation events (jump) = %s",
+                n_net_w_jump)
     logger.info("K+ current (jump) = %s pA\n", k_current_jump)
 
     if sf_diag:
