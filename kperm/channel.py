@@ -4,13 +4,9 @@ The module contains the class Channel and core functions for analysizing
 ion permeation events in MD simulations using the KPERM framework.
 
 """
-import time
 import os
-import logging
-import sys
 import re
 import warnings
-from functools import wraps
 
 import numpy as np
 import MDAnalysis as mda
@@ -19,7 +15,7 @@ from scipy.stats import bootstrap
 
 from kperm.permeation import _find_cycles, _compute_trans_prob, _plot_cycle, \
     _compute_mfpt, _plot_netflux, _count_perm_cross
-from kperm.utils import _write_list_of_tuples
+from kperm.utils import _write_list_of_tuples, _count_time, _create_logger
 
 warnings.simplefilter('always', DeprecationWarning)
 
@@ -425,38 +421,6 @@ based on cross are used."
             save=save,
             data=data,
         )
-
-
-def countTime(func):
-    @wraps(func)
-    def _time_it(*args, **kwargs):
-        start = time.time()
-        try:
-            return func(*args, **kwargs)
-        finally:
-            end = time.time()
-            print(f"Total execution time: {end - start:.5f} s\n\n")
-
-    return _time_it
-
-
-def create_logger(loc):
-    # remove existing handlers, if any
-    logger = logging.getLogger("kchannel")
-    logger.handlers = []
-
-    logger = logging.getLogger("kchannel")
-    logger.setLevel(logging.DEBUG)
-
-    fh = logging.FileHandler(loc, mode="w")
-    fh.setLevel(logging.DEBUG)
-    logger.addHandler(fh)
-
-    ch = logging.StreamHandler(stream=sys.stdout)
-    ch.setLevel(logging.INFO)
-    logger.addHandler(ch)
-
-    return logger
 
 
 def detectSF(*args, **kwargs):
@@ -983,7 +947,7 @@ is identified more than once")
     return jump
 
 
-@countTime
+@_count_time
 def run(
     coor,
     traj,
@@ -999,7 +963,7 @@ def run(
 
     log_loc = os.path.abspath(os.path.join(path, output + ".log"))
 
-    logger = create_logger(log_loc)
+    logger = _create_logger(log_loc)
 
     print(f"Reading coordinate {coor}\nReading trajectory {traj}")
     u = mda.Universe(coor, traj, in_memory=False)
