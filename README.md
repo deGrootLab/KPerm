@@ -1,4 +1,4 @@
-# KPerm - Permeation Cycles in Potassium Channels
+# KPerm - Toolkit for Analysis of Permeation Cycles in Potassium Channels
 This package allows you to identify permeation cycles in potassium channels from molecular dynamics (MD) simulation trajectories.
 
 ## Conda

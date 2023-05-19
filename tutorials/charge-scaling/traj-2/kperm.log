@@ -3,9 +3,16 @@ Total time: 5.000000 ns
 dt: 0.020000 ns
 Number of K+: 148
 Number of water: 7272
-Number of net water permeation events = 0
-Number of net ion permeation events = 6
-Current = 192.24000 pA
+Number of net ion permeation events (jump) = 6
+Number of net water permeation events (jump) = 0
+Current (jump) = 192.23999999999998 pA
+Number of upward ion permeation events (cross) = 36
+Number of downward ion permeation events (cross) = 30
+Number of net ion permeation events (cross) = 6
+Number of upward water permeation events (cross) = 0
+Number of downward water permeation events (cross) = 0
+Number of net water permeation events (cross) = 0
+Ion Current (cross) = 192.23999999999998 pA
 Results saved to /home/clam/projects/Markov/softs/KPerm/tutorials/charge-scaling/traj-2/kperm.csv
 Log saved to /home/clam/projects/Markov/softs/KPerm/tutorials/charge-scaling/traj-2/kperm.log
 =================================

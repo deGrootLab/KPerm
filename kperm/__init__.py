@@ -1,3 +1,1 @@
-from .functions import *
-from .permeation import *
-from .markov import *
+from kperm.channel import Channel, detect_sf, detectSF
