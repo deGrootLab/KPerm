@@ -377,8 +377,8 @@ def _plot_cycle(
     scale=0.1,
     figsize=(10, 10),
     save=None,
-    returnCycleProb=False,
-    returnMainPath=False,
+    cycle_prob=False,
+    main_cycle=False,
 ):
     """given trajectories, compute transition probabilities
 
@@ -389,13 +389,13 @@ def _plot_cycle(
 
     Returns
     -------
-    returnCycleProb: boolean
+    cycle_prob: boolean
         If True, return cycles_dict
             cycles_dict[state_i][state_j] is the probability of observing the
             transition state_i -> state_j in a permeation cycle which starts
             and ends in a specified state.
 
-    returnMainPath: boolean
+    main_cycle: boolean
         If True, return the dominant cycle for determining MFPT using
         permeationMFPT().
 
@@ -533,7 +533,7 @@ def _plot_cycle(
         print(f"saved as {save}")
     _ = plt.show()
 
-    if returnMainPath:
+    if main_cycle:
         transition_pairs = [[k] for k in sidechain.keys()]
         transition_pairs_tmp = [
             [transition_pairs[i], transition_pairs[i + 1]]
@@ -542,11 +542,11 @@ def _plot_cycle(
         transition_pairs = transition_pairs_tmp + [
             [transition_pairs[-1], transition_pairs[0]]
         ]
-        if returnCycleProb:
+        if cycle_prob:
             return cycles_dict, transition_pairs
         else:
             return transition_pairs
-    if returnCycleProb:
+    if cycle_prob:
         return cycles_dict
 
 
@@ -771,7 +771,7 @@ def _compute_mfpt(
 
 
 def _plot_netflux(occupancy_all, weight_threshold=0.1,
-                  save=None, returnGraphData=False):
+                  save=None, data=False):
     """plot net fluxes
 
     Parameters
@@ -867,5 +867,5 @@ def _plot_netflux(occupancy_all, weight_threshold=0.1,
         print(f"saved as {save}")
     _ = plt.show()
 
-    if returnGraphData:
+    if data:
         return states_probs_full, edges_weights_full_positive

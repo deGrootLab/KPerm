@@ -19,7 +19,7 @@ from scipy.stats import bootstrap
 
 from kperm.permeation import _find_cycles, _compute_trans_prob, _plot_cycle, \
     _compute_mfpt, _plot_netflux, _count_perm_cross
-from kperm.utils import write_list_of_tuples
+from kperm.utils import _write_list_of_tuples
 
 warnings.simplefilter('always', DeprecationWarning)
 
@@ -338,10 +338,9 @@ based on cross are used."
         label_threshold=0.15,
         offset=0.7,
         scale=0.4,
-        figsize=(6, 6),
-        returnCycleProb=True,
-        returnMainPath=True,
+        figsize=(6, 6)
     ):
+
         self.cycle_prob, self.main_path = _plot_cycle(
             self.cycles_all,
             state_threshold=state_threshold,
@@ -349,8 +348,8 @@ based on cross are used."
             offset=offset,
             scale=scale,
             figsize=figsize,
-            returnCycleProb=returnCycleProb,
-            returnMainPath=returnMainPath,
+            cycle_prob=True,
+            main_cycle=True,
         )
 
     def permeationMFPT(self, *args, **kwargs):
@@ -409,13 +408,22 @@ based on cross are used."
             DeprecationWarning)
         return self.plot_netflux(*args, **kwargs)
 
-    def plot_netflux(self, weight_threshold=0.1, save=None,
+    def plot_netflux(self, weight_threshold=0.1, save=None, data=False,
                      returnGraphData=False):
+        if returnGraphData is True:
+            warnings.warn(
+                "returnGraphData is renamed to Data. " +
+                "You are recommended to use data=true instead. " +
+                "returnGraphData will be removed in the future.",
+                DeprecationWarning)
+
+            data = True
+
         return _plot_netflux(
             self.occupancy_6_all,
             weight_threshold,
             save=save,
-            returnGraphData=returnGraphData,
+            data=data,
         )
 
 
@@ -460,7 +468,7 @@ def detectSF(*args, **kwargs):
     return detect_sf(*args, **kwargs)
 
 
-def detect_sf(coor, quiet=False, o_cutoff=5, og1_cutoff=7.0, allRes=False):
+def detect_sf(coor, quiet=False, o_cutoff=5, og1_cutoff=7.0, all_res=False):
     """read coordinate file and return zero-indexed atom indices defining SF
 
     Parameters
@@ -476,7 +484,7 @@ def detect_sf(coor, quiet=False, o_cutoff=5, og1_cutoff=7.0, allRes=False):
     og1_cutoff: float
         Same as o_cutoff, but it is for OG1 atom (like threonine's OG1).
         Unit: Angstrom
-    allRes: boolean
+    all_res: boolean
         If false, only amino acids GLY VAL TYR THR PHE ILE are considered
         when determining SF.
 
@@ -491,7 +499,7 @@ def detect_sf(coor, quiet=False, o_cutoff=5, og1_cutoff=7.0, allRes=False):
     u = mda.Universe(coor, in_memory=False)
 
     # Finding backbone oxygen atoms that meet the geometric requirements
-    if allRes:
+    if all_res:
         protein_o = u.select_atoms("protein and name O", updating=False)
     else:
         protein_o = u.select_atoms(
@@ -997,7 +1005,7 @@ def run(
     u = mda.Universe(coor, traj, in_memory=False)
 
     if sf_idx is None:
-        sf_idx = detect_sf(coor, quiet=True, allRes=sf_all_res)
+        sf_idx = detect_sf(coor, quiet=True, all_res=sf_all_res)
 
     sf_o_idx = np.array([sf_idx["O"][i]["idx"]
                         for i in range(len(sf_idx["O"]))])
@@ -1113,15 +1121,15 @@ Check log file for details.", len(double_occ))
         )
 
         if perm_details:
-            write_list_of_tuples(os.path.join(path, "kperm_up.dat"), kperm_up)
-            write_list_of_tuples(os.path.join(
+            _write_list_of_tuples(os.path.join(path, "kperm_up.dat"), kperm_up)
+            _write_list_of_tuples(os.path.join(
                 path, "kperm_down.dat"), kperm_down)
-            write_list_of_tuples(os.path.join(path, "wperm_up.dat"), wperm_up)
-            write_list_of_tuples(os.path.join(
+            _write_list_of_tuples(os.path.join(path, "wperm_up.dat"), wperm_up)
+            _write_list_of_tuples(os.path.join(
                 path, "wperm_down.dat"), wperm_down)
 
-            write_list_of_tuples(os.path.join(path, "k_in_sf.dat"), k_in_sf)
-            write_list_of_tuples(os.path.join(path, "w_in_sf.dat"), w_in_sf)
+            _write_list_of_tuples(os.path.join(path, "k_in_sf.dat"), k_in_sf)
+            _write_list_of_tuples(os.path.join(path, "w_in_sf.dat"), w_in_sf)
 
         n_net_k_cross = np.sum(kperm_traj)
         n_net_w_cross = np.sum(wperm_traj)

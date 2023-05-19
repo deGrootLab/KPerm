@@ -1,2 +1,1 @@
-from kperm.channel import *
-from kperm.permeation import *
+from kperm.channel import Channel, detect_sf
