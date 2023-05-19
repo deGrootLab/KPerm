@@ -677,11 +677,8 @@ def _find_bound(positions, sol_indices, sf_o_indices, additional_bs_cutoff=4.0,
     # bs_full_o_pos_z = np.array(list(bs_layer_o_pos_z) +
     #                          [bs_layer_o_pos_z[-1] - additional_bs_cutoff])
 
-    # add a buffer for S0 upper to avoid water oscillation
     bs_full_o_pos_z = np.array(
-        [bs_layer_o_pos_z[0] + 1.0]
-        + list(bs_layer_o_pos_z[1:])
-        + [bs_layer_o_pos_z[-1] - additional_bs_cutoff]
+        list(bs_layer_o_pos_z) + [bs_layer_o_pos_z[-1] - additional_bs_cutoff]
     )
 
     # keep indices and pos_z only for sol within the range of bs_full_o_pos_z
