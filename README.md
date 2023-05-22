@@ -1,4 +1,8 @@
 # KPerm - Toolkit for Analysis of Permeation Cycles in Potassium Channels
+
+
+[![License](https://img.shields.io/github/license/deGrootLab/KPerm)](https://www.gnu.org/licenses/gpl-3.0.en.html) [![DOI](https://img.shields.io/badge/DOI-10.1021%2Facs.jctc.3c00061-purple)](https://pubs.acs.org/doi/10.1021/acs.jctc.3c00061)
+
 This package allows you to identify permeation cycles in potassium channels from molecular dynamics (MD) simulation trajectories.
 
 ## Conda
