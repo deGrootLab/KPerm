@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.1] - 2023-0X-XX
+
+### Changed
+
+- Removed 1 Angstrom buffer for S0 to improve accuracy of S0 occupancy determination.
+
 ## [0.1.0] - 2023-05-22
 
 ### Added
@@ -24,5 +30,6 @@
 
 - Initial release of KPERM
 
+[0.1.0]: https://github.com/deGrootLab/KPerm/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/deGrootLab/KPerm/compare/v0.0.1...v0.1.0
 [0.0.1]: https://github.com/deGrootLab/KPerm/releases/tag/v0.0.1
