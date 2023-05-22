@@ -17,8 +17,10 @@ def _count_perm_cross(occupancy, group1=(0, 1, 2), group2=(3, 4, 5)):
 
     Parameters
     ----------
-    occupancy: array of size N
-        tranjectory expressed in the form of SF occupancy
+    occupancy: list of lists
+        occupancy of the 6 binding sites of SF.
+        occupancy[t][i] is a list containing the indices of K+ or water
+        occupying the binding site i at frame t.
 
     group1: list of ints
         indicies of binding sites defining the plane on the extracelluar side
