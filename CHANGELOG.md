@@ -1,12 +1,12 @@
 # Changelog
 
-## [0.1.1] - 2023-0X-XX
+## [0.1.1] - 2023-05-23
 
 ### Changed
 
 - Removed 1 Angstrom buffer for S0 to improve accuracy of S0 occupancy determination.
 
-## [0.1.0] - 2023-05-22
+## [0.1.0] - 2023-05-19
 
 ### Added
 
