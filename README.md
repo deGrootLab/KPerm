@@ -22,4 +22,4 @@ Tested with Python 3.11, MDAnalysis 2.4.2, and Numpy 1.24.1.
 pip install kperm
 ```
 
-You can now try our tutorial (tutorials/charge-scaling/charge-scaling.ipynb).
+You can now try our [tutorial on permeation cycles in a charge-scaled system](./tutorials/charge-scaling/charge-scaling.ipynb).
