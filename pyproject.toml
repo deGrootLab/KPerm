@@ -5,6 +5,8 @@ description = "Toolkit for Analysis of Permeation Cycles in Potassium Channels"
 authors = ["Chun Kei (Tom) Lam <chun-kei.lam@mpinat.mpg.de>"]
 license = "GPL-3.0"
 readme = "README.md"
+include = ["CHANGELOG.md"]
+
 
 [tool.poetry.dependencies]
 python = ">=3.8, <3.12"
@@ -19,11 +21,6 @@ jupyter = "^1.0.0"
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.3.1"
 
-
-[[tool.poetry.source]]
-name = "foo"
-url = "https://test.pypi.org/"
-priority = "supplemental"
 
 [build-system]
 requires = ["poetry-core"]
