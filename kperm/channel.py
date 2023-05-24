@@ -21,6 +21,9 @@ warnings.simplefilter('always', DeprecationWarning)
 
 
 class Channel:
+    """TBA.
+
+    """
     def __init__(self, coor=None, trajs=None):
         self.coor = coor
         self.trajs = trajs
@@ -174,14 +177,7 @@ based on cross are used."
         self.n_k_events = n_k_events
 
     def compute_stats(self):
-        """
-        Parameters
-        ----------
-        channel: object
-            info about the channel, defined by the class Channel
-
-        save: string
-            save stats to the location specified
+        """Compute statistics of trajectories regarding ion permeation
 
         Returns
         -------
