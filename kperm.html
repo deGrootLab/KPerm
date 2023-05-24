@@ -1,0 +1,262 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>kperm package &#8212; KPerm 0.1.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css" />
+    
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="kperm" href="modules.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="modules.html" title="kperm"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">KPerm 0.1.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" accesskey="U">kperm</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kperm package</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="kperm-package">
+<h1>kperm package<a class="headerlink" href="#kperm-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-kperm.channel">
+<span id="kperm-channel-module"></span><h2>kperm.channel module<a class="headerlink" href="#module-kperm.channel" title="Permalink to this headline">¶</a></h2>
+<p>Channel class and core workflow of KPERM</p>
+<p>The module contains the class Channel and core functions for analysizing
+ion permeation events in MD simulations using the KPERM framework.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="kperm.channel.Channel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kperm.channel.</span></span><span class="sig-name descname"><span class="pre">Channel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trajs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kperm.channel.Channel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>TBA.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="kperm.channel.Channel.computeStats">
+<span class="sig-name descname"><span class="pre">computeStats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kperm.channel.Channel.computeStats" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kperm.channel.Channel.compute_stats">
+<span class="sig-name descname"><span class="pre">compute_stats</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#kperm.channel.Channel.compute_stats" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute statistics of trajectories regarding ion permeation</p>
+<dl class="simple">
+<dt>stats: Pandas dataframe</dt><dd><p>store statistics of trajectories, such as total time, lag time,
+current and occupation state populations.</p>
+</dd>
+<dt>states: Pandas dataframe</dt><dd><p>point estimate and bootstrap confidence interval for
+occupation states.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kperm.channel.Channel.findCycles">
+<span class="sig-name descname"><span class="pre">findCycles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kperm.channel.Channel.findCycles" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kperm.channel.Channel.find_cycle">
+<span class="sig-name descname"><span class="pre">find_cycle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cycle_state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_jump_per_cycle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kperm.channel.Channel.find_cycle" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kperm.channel.Channel.load">
+<span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results_loc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'kperm'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kperm.channel.Channel.load" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kperm.channel.Channel.mfpt">
+<span class="sig-name descname"><span class="pre">mfpt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.02</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">paths</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_jump_per_cycle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backward</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_resamples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kperm.channel.Channel.mfpt" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kperm.channel.Channel.permeationMFPT">
+<span class="sig-name descname"><span class="pre">permeationMFPT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kperm.channel.Channel.permeationMFPT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kperm.channel.Channel.plotCycles">
+<span class="sig-name descname"><span class="pre">plotCycles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kperm.channel.Channel.plotCycles" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kperm.channel.Channel.plotNetFlux">
+<span class="sig-name descname"><span class="pre">plotNetFlux</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kperm.channel.Channel.plotNetFlux" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kperm.channel.Channel.plot_cycle">
+<span class="sig-name descname"><span class="pre">plot_cycle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.15</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(6,</span> <span class="pre">6)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kperm.channel.Channel.plot_cycle" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kperm.channel.Channel.plot_netflux">
+<span class="sig-name descname"><span class="pre">plot_netflux</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">weight_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">returnGraphData</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kperm.channel.Channel.plot_netflux" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kperm.channel.Channel.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">perm_count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cross'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'kperm'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">perm_details</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sf_diag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kperm.channel.Channel.run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kperm.channel.detectSF">
+<span class="sig-prename descclassname"><span class="pre">kperm.channel.</span></span><span class="sig-name descname"><span class="pre">detectSF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kperm.channel.detectSF" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kperm.channel.detect_sf">
+<span class="sig-prename descclassname"><span class="pre">kperm.channel.</span></span><span class="sig-name descname"><span class="pre">detect_sf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quiet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">o_cutoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">og1_cutoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_res</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kperm.channel.detect_sf" title="Permalink to this definition">¶</a></dt>
+<dd><p>read coordinate file and return zero-indexed atom indices defining SF</p>
+<dl class="simple">
+<dt>coor<span class="classifier">str</span></dt><dd><p>The path to the coordinate file containing the ion channel.</p>
+</dd>
+<dt>quiet<span class="classifier">bool, optional</span></dt><dd><p>A flag used to print detailed information about SF (default is False).</p>
+</dd>
+<dt>o_cutoff: float</dt><dd><p>Distance cutoff for determining if backbone oxygen atoms are close
+enough to meet the geometric requirement for being a part of SF.
+Unit: Angstrom</p>
+</dd>
+<dt>og1_cutoff: float</dt><dd><p>Same as o_cutoff, but it is for OG1 atom (like threonine’s OG1).
+Unit: Angstrom</p>
+</dd>
+<dt>all_res: boolean</dt><dd><p>If false, only amino acids GLY VAL TYR THR PHE ILE are considered
+when determining SF.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>sf_layer: dict</dt><dd><p>consisting of two dictionaries containing atom idx (zero-based) and
+residue id of SF’s oxygen (backbone and hydroxyl) and CA atoms,
+respectively.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kperm.channel.run">
+<span class="sig-prename descclassname"><span class="pre">kperm.channel.</span></span><span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">traj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'kperm'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">perm_count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cross'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">perm_details</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sf_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sf_all_res</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sf_diag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bs_radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kperm.channel.run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-kperm.permeation">
+<span id="kperm-permeation-module"></span><h2>kperm.permeation module<a class="headerlink" href="#module-kperm.permeation" title="Permalink to this headline">¶</a></h2>
+<p>methods for computing permeation cycles</p>
+<p>The module contains the methods used by class Channel for computing
+permeation cycles.</p>
+</div>
+<div class="section" id="module-kperm.tutorials">
+<span id="kperm-tutorials-module"></span><h2>kperm.tutorials module<a class="headerlink" href="#module-kperm.tutorials" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="kperm.tutorials.download_charge_scaling">
+<span class="sig-prename descclassname"><span class="pre">kperm.tutorials.</span></span><span class="sig-name descname"><span class="pre">download_charge_scaling</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#kperm.tutorials.download_charge_scaling" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-kperm.utils">
+<span id="kperm-utils-module"></span><h2>kperm.utils module<a class="headerlink" href="#module-kperm.utils" title="Permalink to this headline">¶</a></h2>
+<p>helpers methods</p>
+</div>
+<div class="section" id="module-kperm">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-kperm" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">kperm package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-kperm.channel">kperm.channel module</a></li>
+<li><a class="reference internal" href="#module-kperm.permeation">kperm.permeation module</a></li>
+<li><a class="reference internal" href="#module-kperm.tutorials">kperm.tutorials module</a></li>
+<li><a class="reference internal" href="#module-kperm.utils">kperm.utils module</a></li>
+<li><a class="reference internal" href="#module-kperm">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="modules.html"
+                          title="previous chapter">kperm</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/kperm.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="modules.html" title="kperm"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">KPerm 0.1.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >kperm</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">kperm package</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2023, Chun Kei Lam.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.5.0.
+    </div>
+  </body>
+</html>
