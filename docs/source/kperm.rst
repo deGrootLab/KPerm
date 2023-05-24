@@ -1,5 +1,8 @@
-API
+kperm package
 =============
+
+Submodules
+----------
 
 kperm.channel module
 --------------------

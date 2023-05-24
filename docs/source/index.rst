@@ -7,11 +7,12 @@ Documentation
 =================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
    installation
-   tutorials/index
-   api
+   examples
+   
+   modules
 
 Indices and tables
 ==================
