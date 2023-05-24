@@ -11,7 +11,6 @@ Documentation
 
    installation
    examples
-   
    modules
 
 Indices and tables
