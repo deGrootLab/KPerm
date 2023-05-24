@@ -6,19 +6,19 @@ KPerm, released together with our [JCTC](https://dx.doi.org/10.1021/acs.jctc.3c0
 
 ## Installation
 
-You are recommended to install KPerm via `pip` in a virtual environment with Python >=3.8.
+You are recommended to install the latest release of KPerm via `pip` in a virtual environment with Python >=3.8.
 
 ```bash
 pip install kperm
 ```
 
-## Tutorial
+## Examples
 
-Try our [tutorial on permeation cycles in a charge-scaled MthK system](./tutorials/charge-scaling/charge-scaling.ipynb).
+- [Permeation Cycle in MthK with charge-scaling](./docs/notebooks/charge-scaling.ipynb)
 
 ## Documentation
 
-In prepration.
+https://degrootlab.github.io/KPerm/
 
 ## Citation
 
