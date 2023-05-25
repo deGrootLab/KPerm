@@ -10,7 +10,7 @@ jobs:
     - name: Build HTML
       uses: ammaraskar/sphinx-action@master
       with:
-        pre-build-command: "pip install -U pip && pip install ."
+        pre-build-command: "pip install -U pip && pip install . && sphinx-apidoc -o docs/source/ kperm"
     - name: Upload artifacts
       uses: actions/upload-artifact@v3
       with:
