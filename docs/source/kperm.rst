@@ -20,7 +20,7 @@ kperm.permeation module
    :undoc-members:
    :show-inheritance:
 
-kperm.tutorials module
+kperm.examples module
 ----------------------
 
 .. automodule:: kperm.examples
