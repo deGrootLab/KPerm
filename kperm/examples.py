@@ -5,7 +5,7 @@ import urllib.request
 def download_charge_scaling():
     data_root_url = (
         "https://github.com/deGrootLab/KPerm/"
-        "raw/main/tutorials/charge-scaling/"
+        "raw/main/examples/charge-scaling/"
     )
     pdb = Path("MthK.pdb")
     if pdb.is_file():
