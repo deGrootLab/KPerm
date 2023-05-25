@@ -20,6 +20,19 @@ jupyter = "^1.0.0"
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.3.1"
 sphinx = "^7.0.1"
+coverage = {extras = ["toml"], version = "^7.2.6"}
+pytest-cov = "^4.1.0"
+
+
+[tool.coverage.paths]
+source = ["kperm"]
+
+[tool.coverage.run]
+branch = true
+source = ["kperm"]
+
+[tool.coverage.report]
+show_missing = true
 
 [[tool.poetry.source]]
 name = "PyPI"
