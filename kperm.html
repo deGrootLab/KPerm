@@ -1,18 +1,17 @@
-
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
     <title>kperm package &#8212; KPerm 0.1.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/classic.css" />
     
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -41,13 +40,13 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="kperm-package">
-<h1>kperm package<a class="headerlink" href="#kperm-package" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="submodules">
-<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="module-kperm.channel">
-<span id="kperm-channel-module"></span><h2>kperm.channel module<a class="headerlink" href="#module-kperm.channel" title="Permalink to this headline">¶</a></h2>
+  <section id="kperm-package">
+<h1>kperm package<a class="headerlink" href="#kperm-package" title="Permalink to this heading">¶</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading">¶</a></h2>
+</section>
+<section id="module-kperm.channel">
+<span id="kperm-channel-module"></span><h2>kperm.channel module<a class="headerlink" href="#module-kperm.channel" title="Permalink to this heading">¶</a></h2>
 <p>Channel class and core workflow of KPERM</p>
 <p>The module contains the class Channel and core functions for analysizing
 ion permeation events in MD simulations using the KPERM framework.</p>
@@ -65,6 +64,8 @@ ion permeation events in MD simulations using the KPERM framework.</p>
 <dt class="sig sig-object py" id="kperm.channel.Channel.compute_stats">
 <span class="sig-name descname"><span class="pre">compute_stats</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#kperm.channel.Channel.compute_stats" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute statistics of trajectories regarding ion permeation</p>
+<section id="returns">
+<h3>Returns<a class="headerlink" href="#returns" title="Permalink to this heading">¶</a></h3>
 <dl class="simple">
 <dt>stats: Pandas dataframe</dt><dd><p>store statistics of trajectories, such as total time, lag time,
 current and occupation state populations.</p>
@@ -73,6 +74,7 @@ current and occupation state populations.</p>
 occupation states.</p>
 </dd>
 </dl>
+</section>
 </dd></dl>
 
 <dl class="py method">
@@ -136,6 +138,8 @@ occupation states.</p>
 <dt class="sig sig-object py" id="kperm.channel.detect_sf">
 <span class="sig-prename descclassname"><span class="pre">kperm.channel.</span></span><span class="sig-name descname"><span class="pre">detect_sf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quiet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">o_cutoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">og1_cutoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_res</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kperm.channel.detect_sf" title="Permalink to this definition">¶</a></dt>
 <dd><p>read coordinate file and return zero-indexed atom indices defining SF</p>
+<section id="parameters">
+<h3>Parameters<a class="headerlink" href="#parameters" title="Permalink to this heading">¶</a></h3>
 <dl class="simple">
 <dt>coor<span class="classifier">str</span></dt><dd><p>The path to the coordinate file containing the ion channel.</p>
 </dd>
@@ -152,12 +156,16 @@ Unit: Angstrom</p>
 when determining SF.</p>
 </dd>
 </dl>
+</section>
+<section id="id1">
+<h3>Returns<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
 <dl class="simple">
 <dt>sf_layer: dict</dt><dd><p>consisting of two dictionaries containing atom idx (zero-based) and
 residue id of SF’s oxygen (backbone and hydroxyl) and CA atoms,
 respectively.</p>
 </dd>
 </dl>
+</section>
 </dd></dl>
 
 <dl class="py function">
@@ -165,29 +173,29 @@ respectively.</p>
 <span class="sig-prename descclassname"><span class="pre">kperm.channel.</span></span><span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">traj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'kperm'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">perm_count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cross'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">perm_details</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sf_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sf_all_res</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sf_diag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bs_radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kperm.channel.run" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-</div>
-<div class="section" id="module-kperm.permeation">
-<span id="kperm-permeation-module"></span><h2>kperm.permeation module<a class="headerlink" href="#module-kperm.permeation" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="module-kperm.permeation">
+<span id="kperm-permeation-module"></span><h2>kperm.permeation module<a class="headerlink" href="#module-kperm.permeation" title="Permalink to this heading">¶</a></h2>
 <p>methods for computing permeation cycles</p>
 <p>The module contains the methods used by class Channel for computing
 permeation cycles.</p>
-</div>
-<div class="section" id="module-kperm.examples">
-<span id="kperm-tutorials-module"></span><h2>kperm.tutorials module<a class="headerlink" href="#module-kperm.examples" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="module-kperm.examples">
+<span id="kperm-examples-module"></span><h2>kperm.examples module<a class="headerlink" href="#module-kperm.examples" title="Permalink to this heading">¶</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="kperm.examples.download_charge_scaling">
 <span class="sig-prename descclassname"><span class="pre">kperm.examples.</span></span><span class="sig-name descname"><span class="pre">download_charge_scaling</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#kperm.examples.download_charge_scaling" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-</div>
-<div class="section" id="module-kperm.utils">
-<span id="kperm-utils-module"></span><h2>kperm.utils module<a class="headerlink" href="#module-kperm.utils" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="module-kperm.utils">
+<span id="kperm-utils-module"></span><h2>kperm.utils module<a class="headerlink" href="#module-kperm.utils" title="Permalink to this heading">¶</a></h2>
 <p>helpers methods</p>
-</div>
-<div class="section" id="module-kperm">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-kperm" title="Permalink to this headline">¶</a></h2>
-</div>
-</div>
+</section>
+<section id="module-kperm">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-kperm" title="Permalink to this heading">¶</a></h2>
+</section>
+</section>
 
 
             <div class="clearer"></div>
@@ -201,9 +209,32 @@ permeation cycles.</p>
     <ul>
 <li><a class="reference internal" href="#">kperm package</a><ul>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
-<li><a class="reference internal" href="#module-kperm.channel">kperm.channel module</a></li>
+<li><a class="reference internal" href="#module-kperm.channel">kperm.channel module</a><ul>
+<li><a class="reference internal" href="#kperm.channel.Channel"><code class="docutils literal notranslate"><span class="pre">Channel</span></code></a><ul>
+<li><a class="reference internal" href="#kperm.channel.Channel.computeStats"><code class="docutils literal notranslate"><span class="pre">Channel.computeStats()</span></code></a></li>
+<li><a class="reference internal" href="#kperm.channel.Channel.compute_stats"><code class="docutils literal notranslate"><span class="pre">Channel.compute_stats()</span></code></a></li>
+<li><a class="reference internal" href="#kperm.channel.Channel.findCycles"><code class="docutils literal notranslate"><span class="pre">Channel.findCycles()</span></code></a></li>
+<li><a class="reference internal" href="#kperm.channel.Channel.find_cycle"><code class="docutils literal notranslate"><span class="pre">Channel.find_cycle()</span></code></a></li>
+<li><a class="reference internal" href="#kperm.channel.Channel.load"><code class="docutils literal notranslate"><span class="pre">Channel.load()</span></code></a></li>
+<li><a class="reference internal" href="#kperm.channel.Channel.mfpt"><code class="docutils literal notranslate"><span class="pre">Channel.mfpt()</span></code></a></li>
+<li><a class="reference internal" href="#kperm.channel.Channel.permeationMFPT"><code class="docutils literal notranslate"><span class="pre">Channel.permeationMFPT()</span></code></a></li>
+<li><a class="reference internal" href="#kperm.channel.Channel.plotCycles"><code class="docutils literal notranslate"><span class="pre">Channel.plotCycles()</span></code></a></li>
+<li><a class="reference internal" href="#kperm.channel.Channel.plotNetFlux"><code class="docutils literal notranslate"><span class="pre">Channel.plotNetFlux()</span></code></a></li>
+<li><a class="reference internal" href="#kperm.channel.Channel.plot_cycle"><code class="docutils literal notranslate"><span class="pre">Channel.plot_cycle()</span></code></a></li>
+<li><a class="reference internal" href="#kperm.channel.Channel.plot_netflux"><code class="docutils literal notranslate"><span class="pre">Channel.plot_netflux()</span></code></a></li>
+<li><a class="reference internal" href="#kperm.channel.Channel.run"><code class="docutils literal notranslate"><span class="pre">Channel.run()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#kperm.channel.detectSF"><code class="docutils literal notranslate"><span class="pre">detectSF()</span></code></a></li>
+<li><a class="reference internal" href="#kperm.channel.detect_sf"><code class="docutils literal notranslate"><span class="pre">detect_sf()</span></code></a></li>
+<li><a class="reference internal" href="#kperm.channel.run"><code class="docutils literal notranslate"><span class="pre">run()</span></code></a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#module-kperm.permeation">kperm.permeation module</a></li>
-<li><a class="reference internal" href="#module-kperm.examples">kperm.tutorials module</a></li>
+<li><a class="reference internal" href="#module-kperm.examples">kperm.examples module</a><ul>
+<li><a class="reference internal" href="#kperm.examples.download_charge_scaling"><code class="docutils literal notranslate"><span class="pre">download_charge_scaling()</span></code></a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#module-kperm.utils">kperm.utils module</a></li>
 <li><a class="reference internal" href="#module-kperm">Module contents</a></li>
 </ul>
@@ -232,7 +263,7 @@ permeation cycles.</p>
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -256,7 +287,7 @@ permeation cycles.</p>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2023, Chun Kei Lam.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.5.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.0.1.
     </div>
   </body>
 </html>
