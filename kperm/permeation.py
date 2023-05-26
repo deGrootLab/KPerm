@@ -146,8 +146,9 @@ def _partition_perm_events(occupancy, k_jump, cycle_state, n_jump_per_cycle=5):
                     ):
                         found = True
                         print(
-                            f"Not returning to {cycle_state}, \
-no cycle is formed"
+                            f"At frame {t}, number of jumps exceeds "
+                            f"{n_jump_per_cycle} but no cycle is detected as "
+                            f"SF does not return to {cycle_state}."
                         )
             t = t + T - 1
         t = t + 1
@@ -277,7 +278,7 @@ def _compute_trans_prob(trajs, return_matrix=False, quiet=False):
 
     Parameters
     ----------
-    trajs: list of arrays of size N    or   list of lists of arrays
+    trajs: list of arrays of size N or list of lists of arrays
         trajectories, can be occupancy or cycles for all trajectories
 
     return_matrix: boolean
@@ -381,6 +382,7 @@ def _plot_cycle(
     save=None,
     cycle_prob=False,
     main_cycle=False,
+    show=True
 ):
     """given trajectories, compute transition probabilities
 
@@ -533,7 +535,11 @@ def _plot_cycle(
     if save is not None:
         _ = plt.savefig(save, dpi=400)
         print(f"saved as {save}")
-    _ = plt.show()
+
+    if show:
+        _ = plt.show()
+    else:
+        plt.close("all")
 
     if main_cycle:
         transition_pairs = [[k] for k in sidechain.keys()]
@@ -561,7 +567,7 @@ def _compute_first_passage_times(
     Parameters
     ----------
     occupancy: array of size N
-        tranjectory expressed in the form of SF occupancy
+        a tranjectory expressed in the form of SF occupancy
 
     jumps: arrays of size (N-1, 2)
         net jumps for ion and water for one trajectory
@@ -581,12 +587,12 @@ def _compute_first_passage_times(
     backward: boolean, False by default
         whether the hitting times corresponding to transitions in which the
         ion movement is against the gradient. If True, then only
-        transitions with +ve k_netjump are taken into account
+        transitions with positive k_netjump are taken into account
 
     Returns
     -------
     fpts: list of int
-        First passage time
+        First passage time, unit of time = 1
 
     k_netjumps_count: list of int
         # net k jumps involved in the transitions
@@ -603,8 +609,9 @@ def _compute_first_passage_times(
     k_netjumps_counts = []
     w_netjumps_counts = []
 
-    k_netjumps = jumps[:, 0]
-    w_netjumps = jumps[:, 1]
+    if jumps is not None:
+        k_netjumps = jumps[:, 0]
+        w_netjumps = jumps[:, 1]
 
     waiting = False
     passage_time = 0
@@ -622,6 +629,7 @@ def _compute_first_passage_times(
                 end_idx = i
                 if jumps is None:
                     k_netjump = 0
+                    w_netjump = 0
                 else:
                     k_netjump = int(np.sum(k_netjumps[start_idx:end_idx]))
                     w_netjump = int(np.sum(w_netjumps[start_idx:end_idx]))
@@ -658,7 +666,7 @@ def _compute_mfpt(
     jumps_all,
     pairs,
     n_jump_per_cycle=5,
-    dt=0.02,
+    dt=1,
     backward=False,
     batch=10000,
     n_resamples=10000,
@@ -688,11 +696,18 @@ def _compute_mfpt(
     dt: float
         lag time in ns
 
+    backward: boolean, False by default
+        whether the hitting times corresponding to transitions in which the
+        ion movement is against the gradient. If True, then only
+        transitions with positive k_netjump are taken into account
+
     Returns
     -------
     df: Pandas dataframe
         all computed mean first passage times
     """
+    print(f"df = {dt} is used for the MFPT calculation.")
+
     data = []
     hts_output = {}
     for initial_states, final_states in pairs:
@@ -761,9 +776,9 @@ def _compute_mfpt(
         columns=[
             "initial",
             "final",
-            "mean (ns)",
-            "low (ns)",
-            "high (ns)",
+            "mfpt",
+            "mfpt_l",
+            "mfpt_h",
             "n",
             "k_f",
             "w_f",
@@ -773,7 +788,7 @@ def _compute_mfpt(
 
 
 def _plot_netflux(occupancy_all, weight_threshold=0.1,
-                  save=None, data=False):
+                  save=None, data=False, show=True):
     """plot net fluxes
 
     Parameters
@@ -867,7 +882,11 @@ def _plot_netflux(occupancy_all, weight_threshold=0.1,
     if save is not None:
         _ = plt.savefig(save, dpi=300)
         print(f"saved as {save}")
-    _ = plt.show()
+
+    if show:
+        plt.show()
+    else:
+        plt.close("all")
 
     if data:
         return states_probs_full, edges_weights_full_positive

@@ -354,7 +354,6 @@ based on cross are used."
 
     def mfpt(
         self,
-        dt=0.02,
         paths=None,
         n_jump_per_cycle=5,
         backward=False,
@@ -372,7 +371,7 @@ based on cross are used."
                 self.jumps_all,
                 paths,
                 n_jump_per_cycle=n_jump_per_cycle,
-                dt=dt,
+                dt=self.dts[0],
                 backward=backward,
                 batch=batch,
                 n_resamples=n_resamples,
@@ -383,7 +382,7 @@ based on cross are used."
                 self.jumps_all,
                 paths,
                 n_jump_per_cycle=n_jump_per_cycle,
-                dt=dt,
+                dt=self.dts[0],
                 backward=backward,
                 batch=batch,
                 n_resamples=n_resamples,
