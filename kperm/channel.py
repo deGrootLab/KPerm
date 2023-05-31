@@ -275,14 +275,6 @@ based on cross are used."
 
         self.stats = stats
 
-    def computeStats(self, *args, **kwargs):
-        warnings.warn(
-            "computeStats() is renamed to compute_stats(). " +
-            "You are recommended to call <Channel>.compute_stats() instead. " +
-            "computeStats() will be removed in the future.",
-            DeprecationWarning)
-        return self.compute_stats(*args, **kwargs)
-
     def find_cycle(self, cycle_state, n_jump_per_cycle=5):
         if len(cycle_state) == 4:
             cycles, perm_idx_all, cycle_count_perc = _find_cycles(
@@ -308,22 +300,6 @@ based on cross are used."
 
         return cycle_count_perc
 
-    def findCycles(self, *args, **kwargs):
-        warnings.warn(
-            "findCycles() is renamed to find_cycle(). " +
-            "You are recommended to call <Channel>.find_cycle() instead. " +
-            "findCycles() will be removed in the future.",
-            DeprecationWarning)
-        return self.find_cycle(*args, **kwargs)
-
-    def plotCycles(self, *args, **kwargs):
-        warnings.warn(
-            "plotCycles() is renamed to plot_cycle(). " +
-            "You are recommended to call <Channel>.plot_cycle() instead. " +
-            "plotCycles() will be removed in the future.",
-            DeprecationWarning)
-        return self.plot_cycle(*args, **kwargs)
-
     def plot_cycle(
         self,
         state_threshold=0.01,
@@ -343,14 +319,6 @@ based on cross are used."
             cycle_prob=True,
             main_cycle=True,
         )
-
-    def permeationMFPT(self, *args, **kwargs):
-        warnings.warn(
-            "permeationMFPT() is renamed to mfpt(). " +
-            "You are recommended to call <Channel>.mfpt() instead. " +
-            "permeationMFPT() will be removed in the future.",
-            DeprecationWarning)
-        return self.mfpt(*args, **kwargs)
 
     def mfpt(
         self,
@@ -391,14 +359,6 @@ based on cross are used."
             raise ValueError("paths invalid.")
         return mfpt, fps
 
-    def plotNetFlux(self, *args, **kwargs):
-        warnings.warn(
-            "plotNetFlux() is renamed to plot_netflux(). " +
-            "You are recommended to call <Channel>.plot_netflux() instead. " +
-            "plotNetFlux() will be removed in the future.",
-            DeprecationWarning)
-        return self.plot_netflux(*args, **kwargs)
-
     def plot_netflux(self, weight_threshold=0.1, save=None, data=False,
                      returnGraphData=False):
         if returnGraphData is True:
@@ -416,15 +376,6 @@ based on cross are used."
             save=save,
             data=data,
         )
-
-
-def detectSF(*args, **kwargs):
-    warnings.warn(
-        "detectSF() is renamed to detect_sf(). " +
-        "You are recommended to call detect_sf() instead. " +
-        "detectSF() will be removed in the future.",
-        DeprecationWarning)
-    return detect_sf(*args, **kwargs)
 
 
 def detect_sf(coor, quiet=False, o_cutoff=5, og1_cutoff=7.0, all_res=False):

@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.X.X] - 2023-0X-XX
+
+### Changed
+- findCycles renamed to find_cycle
+- permeationMFPT renamed to mfpt
+- plotCycles renamed to plot_cycle
+- plotNetFlux renamed to plotNetFlux
+- computeStats renamed to compute_stats
+
+### Changed
+
 ## [0.1.1] - 2023-05-23
 
 ### Changed
