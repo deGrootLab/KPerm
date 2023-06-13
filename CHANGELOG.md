@@ -4,6 +4,7 @@
 
 ### Added
 - set_coord() and set_trajs() for specifying coordinate and trajectory files.
+- Users now can adjust the radius of the binding site using keyword `bs_radius` in `Channel.run()`. Default: 4.0 (Angstrom)
 
 ### Changed
 - findCycles renamed to find_cycle

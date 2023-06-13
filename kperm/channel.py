@@ -72,7 +72,7 @@ class Channel:
             print("\t", traj)
 
     def run(self, perm_count=("cross"), output="kperm",
-            perm_details=False, sf_diag=False):
+            perm_details=False, sf_diag=False, bs_radius=4.0):
         self.results_loc = []
 
         for traj in self.trajs:
@@ -83,6 +83,7 @@ class Channel:
                 perm_details=perm_details,
                 output=output,
                 sf_diag=sf_diag,
+                bs_radius=bs_radius
             )
 
             self.results_loc.append(os.path.dirname(traj))
