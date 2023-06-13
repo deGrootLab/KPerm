@@ -7,6 +7,7 @@ ion permeation events in MD simulations using the KPERM framework.
 import os
 import re
 import warnings
+from pathlib import Path
 
 import numpy as np
 import MDAnalysis as mda
@@ -24,8 +25,8 @@ class Channel:
     """TBA.
 
     """
-    def __init__(self, coor=None, trajs=None):
-        self.coor = coor
+    def __init__(self, coord=None, trajs=None):
+        self.coord = coord
         self.trajs = trajs
         self.results_loc = []
         self.occupancy_4_all = []
@@ -44,13 +45,39 @@ class Channel:
         self.cycle_prob = None
         self.main_path = None
 
+    def set_coord(self, coord):
+        coord = Path(coord)
+        assert coord.is_file(), "Input coordinate file does not exist."
+        self.coord = coord
+
+        print("Coordinate is set to:")
+        print("\t", coord)
+
+    def set_trajs(self, trajs):
+        if isinstance(trajs, str):
+            trajs = [trajs]
+        elif isinstance(trajs, list) and isinstance(trajs[0], str):
+            pass
+        else:
+            raise TypeError("Neither a string of a list of strings is provided.")
+
+        trajs = [Path(traj) for traj in trajs]
+        for traj in trajs:
+            assert traj.is_file(), f"Input trajectory {traj} does not exist."
+
+        self.trajs = trajs
+
+        print(f"Trajectories are set to:")
+        for traj in trajs:
+            print("\t", traj)
+
     def run(self, perm_count=("cross"), output="kperm",
             perm_details=False, sf_diag=False):
         self.results_loc = []
 
         for traj in self.trajs:
             run(
-                self.coor,
+                self.coord,
                 traj,
                 perm_count=perm_count,
                 perm_details=perm_details,
@@ -264,7 +291,7 @@ based on cross are used."
         print(f"total time (ns): {self.total_times}")
         print(f"dt (ns): {self.dts}")
         print("coordinate:")
-        print(f"\t{self.coor}")
+        print(f"\t{self.coord}")
         print("trajectories:")
         if self.trajs is None:
             print(f"\t{self.trajs}")
@@ -378,7 +405,7 @@ based on cross are used."
         )
 
 
-def detect_sf(coor, quiet=False, o_cutoff=5, og1_cutoff=7.0, all_res=False):
+def detect_sf(coord, quiet=False, o_cutoff=5, og1_cutoff=7.0, all_res=False):
     """read coordinate file and return zero-indexed atom indices defining SF
 
     Parameters
@@ -406,7 +433,7 @@ def detect_sf(coor, quiet=False, o_cutoff=5, og1_cutoff=7.0, all_res=False):
         respectively.
 
     """
-    u = mda.Universe(coor, in_memory=False)
+    u = mda.Universe(coord, in_memory=False)
 
     # Finding backbone oxygen atoms that meet the geometric requirements
     if all_res:
@@ -544,12 +571,12 @@ def detect_sf(coor, quiet=False, o_cutoff=5, og1_cutoff=7.0, all_res=False):
     return sf_layer
 
 
-def _get_non_protein_index(coor):
+def _get_non_protein_index(coord):
     """read coordinate file and return zero-indexed atom indices defining SF
 
     Parameters
     ----------
-    coor : str
+    coord : str
         The path to the coordinate file containing the system
 
     Returns
@@ -558,7 +585,7 @@ def _get_non_protein_index(coor):
         arrays of zero-indexed indices of K, Cl and water respectively
 
     """
-    u = mda.Universe(coor, in_memory=False)
+    u = mda.Universe(coord, in_memory=False)
 
     indices = (
         u.select_atoms("resname K POT", updating=False).ix,
@@ -577,7 +604,7 @@ def _find_bound(positions, sol_indices, sf_o_indices, additional_bs_cutoff=4.0,
 
     Parameters
     ----------
-    coor : str
+    coord : str
         The path to the coordinate file containing the system.
     sol_idx : array of int
         containing zero-based indices of particles such as oxygen of water,
@@ -892,7 +919,7 @@ is identified more than once")
 
 @_count_time
 def run(
-    coor,
+    coord,
     traj,
     output="kperm",
     perm_count=("cross"),
@@ -908,18 +935,18 @@ def run(
 
     logger = _create_logger(log_loc)
 
-    print(f"Reading coordinate {coor}\nReading trajectory {traj}")
-    u = mda.Universe(coor, traj, in_memory=False)
+    print(f"Reading coordinate {coord}\nReading trajectory {traj}")
+    u = mda.Universe(coord, traj, in_memory=False)
 
     if sf_idx is None:
-        sf_idx = detect_sf(coor, quiet=True, all_res=sf_all_res)
+        sf_idx = detect_sf(coord, quiet=True, all_res=sf_all_res)
 
     sf_o_idx = np.array([sf_idx["O"][i]["idx"]
                         for i in range(len(sf_idx["O"]))])
     sf_ca_idx = np.array([sf_idx["CA"][i]["idx"]
                          for i in range(len(sf_idx["CA"]))])
 
-    k_idx, _, water_idx = _get_non_protein_index(coor)
+    k_idx, _, water_idx = _get_non_protein_index(coord)
 
     k_occupancy = []
     w_occupancy = []

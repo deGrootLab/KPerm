@@ -2,6 +2,9 @@
 
 ## [0.X.X] - 2023-0X-XX
 
+### Added
+- set_coord() and set_trajs() for specifying coordinate and trajectory files.
+
 ### Changed
 - findCycles renamed to find_cycle
 - permeationMFPT renamed to mfpt
