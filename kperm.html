@@ -52,14 +52,9 @@
 ion permeation events in MD simulations using the KPERM framework.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="kperm.channel.Channel">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kperm.channel.</span></span><span class="sig-name descname"><span class="pre">Channel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trajs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kperm.channel.Channel" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kperm.channel.</span></span><span class="sig-name descname"><span class="pre">Channel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coord</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trajs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kperm.channel.Channel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>TBA.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="kperm.channel.Channel.computeStats">
-<span class="sig-name descname"><span class="pre">computeStats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kperm.channel.Channel.computeStats" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
 <dl class="py method">
 <dt class="sig sig-object py" id="kperm.channel.Channel.compute_stats">
 <span class="sig-name descname"><span class="pre">compute_stats</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#kperm.channel.Channel.compute_stats" title="Permalink to this definition">¶</a></dt>
@@ -78,11 +73,6 @@ occupation states.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="kperm.channel.Channel.findCycles">
-<span class="sig-name descname"><span class="pre">findCycles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kperm.channel.Channel.findCycles" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="kperm.channel.Channel.find_cycle">
 <span class="sig-name descname"><span class="pre">find_cycle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cycle_state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_jump_per_cycle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kperm.channel.Channel.find_cycle" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -98,21 +88,6 @@ occupation states.</p>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="kperm.channel.Channel.permeationMFPT">
-<span class="sig-name descname"><span class="pre">permeationMFPT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kperm.channel.Channel.permeationMFPT" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="kperm.channel.Channel.plotCycles">
-<span class="sig-name descname"><span class="pre">plotCycles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kperm.channel.Channel.plotCycles" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="kperm.channel.Channel.plotNetFlux">
-<span class="sig-name descname"><span class="pre">plotNetFlux</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kperm.channel.Channel.plotNetFlux" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="kperm.channel.Channel.plot_cycle">
 <span class="sig-name descname"><span class="pre">plot_cycle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.15</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(6,</span> <span class="pre">6)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kperm.channel.Channel.plot_cycle" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -124,19 +99,24 @@ occupation states.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kperm.channel.Channel.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">perm_count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cross'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'kperm'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">perm_details</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sf_diag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kperm.channel.Channel.run" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">perm_count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cross'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'kperm'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">perm_details</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sf_diag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bs_radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kperm.channel.Channel.run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kperm.channel.Channel.set_coord">
+<span class="sig-name descname"><span class="pre">set_coord</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coord</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kperm.channel.Channel.set_coord" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kperm.channel.Channel.set_trajs">
+<span class="sig-name descname"><span class="pre">set_trajs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trajs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kperm.channel.Channel.set_trajs" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="kperm.channel.detectSF">
-<span class="sig-prename descclassname"><span class="pre">kperm.channel.</span></span><span class="sig-name descname"><span class="pre">detectSF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kperm.channel.detectSF" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="kperm.channel.detect_sf">
-<span class="sig-prename descclassname"><span class="pre">kperm.channel.</span></span><span class="sig-name descname"><span class="pre">detect_sf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quiet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">o_cutoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">og1_cutoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_res</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kperm.channel.detect_sf" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">kperm.channel.</span></span><span class="sig-name descname"><span class="pre">detect_sf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coord</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quiet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">o_cutoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">og1_cutoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_res</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kperm.channel.detect_sf" title="Permalink to this definition">¶</a></dt>
 <dd><p>read coordinate file and return zero-indexed atom indices defining SF</p>
 <section id="parameters">
 <h3>Parameters<a class="headerlink" href="#parameters" title="Permalink to this heading">¶</a></h3>
@@ -170,7 +150,7 @@ respectively.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kperm.channel.run">
-<span class="sig-prename descclassname"><span class="pre">kperm.channel.</span></span><span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">traj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'kperm'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">perm_count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cross'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">perm_details</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sf_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sf_all_res</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sf_diag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bs_radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kperm.channel.run" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">kperm.channel.</span></span><span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coord</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">traj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'kperm'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">perm_count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cross'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">perm_details</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sf_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sf_all_res</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sf_diag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bs_radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kperm.channel.run" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </section>
@@ -211,21 +191,17 @@ permeation cycles.</p>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
 <li><a class="reference internal" href="#module-kperm.channel">kperm.channel module</a><ul>
 <li><a class="reference internal" href="#kperm.channel.Channel"><code class="docutils literal notranslate"><span class="pre">Channel</span></code></a><ul>
-<li><a class="reference internal" href="#kperm.channel.Channel.computeStats"><code class="docutils literal notranslate"><span class="pre">Channel.computeStats()</span></code></a></li>
 <li><a class="reference internal" href="#kperm.channel.Channel.compute_stats"><code class="docutils literal notranslate"><span class="pre">Channel.compute_stats()</span></code></a></li>
-<li><a class="reference internal" href="#kperm.channel.Channel.findCycles"><code class="docutils literal notranslate"><span class="pre">Channel.findCycles()</span></code></a></li>
 <li><a class="reference internal" href="#kperm.channel.Channel.find_cycle"><code class="docutils literal notranslate"><span class="pre">Channel.find_cycle()</span></code></a></li>
 <li><a class="reference internal" href="#kperm.channel.Channel.load"><code class="docutils literal notranslate"><span class="pre">Channel.load()</span></code></a></li>
 <li><a class="reference internal" href="#kperm.channel.Channel.mfpt"><code class="docutils literal notranslate"><span class="pre">Channel.mfpt()</span></code></a></li>
-<li><a class="reference internal" href="#kperm.channel.Channel.permeationMFPT"><code class="docutils literal notranslate"><span class="pre">Channel.permeationMFPT()</span></code></a></li>
-<li><a class="reference internal" href="#kperm.channel.Channel.plotCycles"><code class="docutils literal notranslate"><span class="pre">Channel.plotCycles()</span></code></a></li>
-<li><a class="reference internal" href="#kperm.channel.Channel.plotNetFlux"><code class="docutils literal notranslate"><span class="pre">Channel.plotNetFlux()</span></code></a></li>
 <li><a class="reference internal" href="#kperm.channel.Channel.plot_cycle"><code class="docutils literal notranslate"><span class="pre">Channel.plot_cycle()</span></code></a></li>
 <li><a class="reference internal" href="#kperm.channel.Channel.plot_netflux"><code class="docutils literal notranslate"><span class="pre">Channel.plot_netflux()</span></code></a></li>
 <li><a class="reference internal" href="#kperm.channel.Channel.run"><code class="docutils literal notranslate"><span class="pre">Channel.run()</span></code></a></li>
+<li><a class="reference internal" href="#kperm.channel.Channel.set_coord"><code class="docutils literal notranslate"><span class="pre">Channel.set_coord()</span></code></a></li>
+<li><a class="reference internal" href="#kperm.channel.Channel.set_trajs"><code class="docutils literal notranslate"><span class="pre">Channel.set_trajs()</span></code></a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#kperm.channel.detectSF"><code class="docutils literal notranslate"><span class="pre">detectSF()</span></code></a></li>
 <li><a class="reference internal" href="#kperm.channel.detect_sf"><code class="docutils literal notranslate"><span class="pre">detect_sf()</span></code></a></li>
 <li><a class="reference internal" href="#kperm.channel.run"><code class="docutils literal notranslate"><span class="pre">run()</span></code></a></li>
 </ul>
