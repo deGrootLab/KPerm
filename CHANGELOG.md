@@ -1,17 +1,20 @@
 # Changelog
 
-## [0.X.X] - 2023-0X-XX
+## [0.2.0] - 2023-08-03
 
 ### Added
-- set_coord() and set_trajs() for specifying coordinate and trajectory files.
+- Two methods, `cross`  and `jump`, for computing current
+- `set_coord()` and `set_trajs()` for specifying coordinate and trajectory files
+- `Channel.detect_sf()` for showing the identified constituent atoms for SF
 - Users now can adjust the radius of the binding site using keyword `bs_radius` in `Channel.run()`. Default: 4.0 (Angstrom)
 
 ### Changed
-- findCycles renamed to find_cycle
-- permeationMFPT renamed to mfpt
-- plotCycles renamed to plot_cycle
-- plotNetFlux renamed to plotNetFlux
-- computeStats renamed to compute_stats
+- `FindCycles` renamed to `find_cycle`
+- `permeationMFPT` renamed to `mfpt`
+- `plotCycles` renamed to `plot_cycle`
+- `plotNetFlux` renamed to `plotNetFlux`
+- `computeStats` renamed to `compute_stats`
+- Charge-scaling tutorial updated
 
 ### Changed
 
@@ -45,6 +48,7 @@
 
 - Initial release of KPERM
 
+[0.2.0]: https://github.com/deGrootLab/KPerm/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/deGrootLab/KPerm/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/deGrootLab/KPerm/compare/v0.0.1...v0.1.0
 [0.0.1]: https://github.com/deGrootLab/KPerm/releases/tag/v0.0.1

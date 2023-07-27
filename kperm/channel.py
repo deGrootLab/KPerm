@@ -67,9 +67,12 @@ class Channel:
 
         self.trajs = trajs
 
-        print(f"Trajectories are set to:")
+        print("Trajectories are set to:")
         for traj in trajs:
             print("\t", traj)
+
+    def detect_sf(self):
+        detect_sf(self.coord)
 
     def run(self, perm_count=("cross"), output="kperm",
             perm_details=False, sf_diag=False, bs_radius=4.0):
