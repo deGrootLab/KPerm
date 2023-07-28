@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "kperm"
-version = "0.1.1"
+version = "0.2.0"
 description = "Toolkit for Analysis of Permeation Cycles in Potassium Channels"
 authors = ["Chun Kei (Tom) Lam <chun-kei.lam@mpinat.mpg.de>"]
 license = "GPL-3.0"
