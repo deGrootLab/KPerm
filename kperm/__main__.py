@@ -25,10 +25,10 @@ def main():
                         help='detect SF atoms, count permeation events,' +
                         'and compute summary of permeation events ' +
                         'in selected trajectories')
-    parser.add_argument("-s", help="coordinate file", required=True)
-    parser.add_argument("-f", nargs='+',
-                        help="trajectories or  folders containing log files",
+    parser.add_argument("-s", help="coordinate file", metavar="coord_path",
                         required=True)
+    parser.add_argument("-f", nargs='+', metavar="traj_path",
+                        help="trajectories or  folders containing log files")
     parser.add_argument("--jump", help='count permeation events ' +
                         'by number of jumps', action="store_true")
     parser.add_argument("--noW", help='ignore water', action="store_true")
@@ -43,7 +43,8 @@ def main():
         print()
         channel = kp.Channel()
         channel.set_coord(args.s)
-        channel.set_trajs(args.f)
+        if args.f is not None:
+            channel.set_trajs(args.f)
         print()
 
         sf(channel)
@@ -52,7 +53,11 @@ def main():
         print()
         channel = kp.Channel()
         channel.set_coord(args.s)
-        channel.set_trajs(args.f)
+        if args.f is None:
+            parser.error('argument -f is missing. ' +
+                         'Input trajectories are required.')
+        else:
+            channel.set_trajs(args.f)
         print()
 
         if args.jump:
@@ -70,6 +75,9 @@ def main():
 
         if isinstance(args.f, str):
             args.f = [args.f]
+
+        if args.f is None:
+            parser.error('argument -f is missing.')
 
         log_paths = []
         traj_paths = []
