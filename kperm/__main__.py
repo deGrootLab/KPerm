@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # PYTHON_ARGCOMPLETE_OK
 import argparse
-import argcomplete
 from pathlib import Path
+
+import argcomplete
 import kperm as kp
 
 
@@ -11,8 +12,8 @@ def sf(channel):
 
 
 def run(channel, perm_count, check_water, check_flip):
-    channel.run(perm_details=True, perm_count=perm_count, 
-                check_water=check_water,check_flip=check_flip)
+    channel.run(perm_details=True, perm_count=perm_count,
+                check_water=check_water, check_flip=check_flip)
 
 
 def stats(channel):
@@ -25,14 +26,16 @@ def main():
                         help='detect SF atoms, count permeation events,' +
                         'and compute summary of permeation events ' +
                         'in selected trajectories')
-    parser.add_argument("-s", help="coordinate file", metavar="coord_path",
+    parser.add_argument("-s", help="coordinate file [<.pdb/.gro/...>]",
+                        metavar="coord_path",
                         required=True)
     parser.add_argument("-f", nargs='+', metavar="traj_path",
-                        help="trajectories or  folders containing log files")
+                        help="trajectories [<.xtc/.trr/...>] or " +
+                        "folders containing log files")
     parser.add_argument("--jump", help='count permeation events ' +
                         'by number of jumps', action="store_true")
     parser.add_argument("--noW", help='ignore water', action="store_true")
-    parser.add_argument("--noFlip", help='do not check oxygem flip', 
+    parser.add_argument("--noFlip", help='do not check oxygen flip',
                         action="store_true")
 
     argcomplete.autocomplete(parser)
@@ -61,11 +64,11 @@ def main():
         print()
 
         if args.jump:
-            run(channel, ('cross', 'jump'), check_water=(not args.noW),
-                check_flip=(not args.noFlip))
+            run(channel, ('cross', 'jump'), check_water=not args.noW,
+                check_flip=not args.noFlip)
         else:
-            run(channel, ('cross'), check_water=(not args.noW),
-                check_flip=(not args.noFlip))
+            run(channel, ('cross'), check_water=not args.noW,
+                check_flip=not args.noFlip)
 
     elif args.mode == 'stats':
 
