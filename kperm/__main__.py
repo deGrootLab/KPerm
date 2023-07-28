@@ -10,8 +10,8 @@ def sf(channel):
     channel.detect_sf()
 
 
-def run(channel):
-    channel.run(perm_details=True, perm_count=['cross', 'jump'])
+def run(channel, perm_count):
+    channel.run(perm_details=True, perm_count=perm_count)
 
 
 def stats(channel):
@@ -19,14 +19,17 @@ def stats(channel):
 
 
 def main():
-    # eval "$(register-python-argcomplete kperm)"
-
     parser = argparse.ArgumentParser()
-    parser.add_argument("mode")
+    parser.add_argument("mode", choices=['sf', 'run', 'stats'],
+                        help='detect SF atoms, count permeation events,' +
+                        'and compute summary of permeation events ' +
+                        'in selected trajectories')
     parser.add_argument("-s", help="coordinate file", required=True)
     parser.add_argument("-f", nargs='+',
                         help="trajectories or  folders containing log files",
                         required=True)
+    parser.add_argument("--jump", help='count permeation events ' +
+                        'by number of jumps', action="store_true")
 
     argcomplete.autocomplete(parser)
     args = parser.parse_args()
@@ -48,7 +51,10 @@ def main():
         channel.set_trajs(args.f)
         print()
 
-        run(channel)
+        if args.jump:
+            run(channel, ('cross', 'jump'))
+        else:
+            run(channel, ('cross'))
 
     elif args.mode == 'stats':
 
@@ -58,7 +64,7 @@ def main():
 
         if isinstance(args.f, str):
             args.f = [args.f]
-        
+
         log_paths = []
         traj_paths = []
 
@@ -76,7 +82,6 @@ def main():
         print()
 
         stats(channel)
-
 
 
 if __name__ == "__main__":

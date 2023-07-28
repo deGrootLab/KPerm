@@ -3,6 +3,7 @@
 ## [0.2.0] - 2023-08-03
 
 ### Added
+- Command-line interface following GROMACS style
 - Two methods, `cross`  and `jump`, for computing current
 - `set_coord()` and `set_trajs()` for specifying coordinate and trajectory files
 - `Channel.detect_sf()` for showing the identified constituent atoms for SF
