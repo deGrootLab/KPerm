@@ -14,7 +14,22 @@ pip install kperm
 
 ## Examples
 
+### Jupyter Notebook
+
 - [Permeation Cycle in MthK with charge-scaling](./docs/notebooks/charge-scaling.ipynb)
+
+### Command-line Interface
+```bash
+# same as Channel.run(), computing SF occuapncy and identifying permeation events
+kperm run -s coord_file -f traj_1 traj_2 traj_3 ...
+
+# speed things up if you are not interested in SF oxygen flip and water occupancy
+kperm run -s coord_file -f traj_1 traj_2 traj_3 ... --noFlip --noW
+
+# compute summary of permeation events of all selected simulations 
+# use it after running "kperm run"
+kperm stats -s coord_file -f traj_1 traj_2 traj_3 ...
+```
 
 ## Documentation
 
