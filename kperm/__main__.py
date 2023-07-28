@@ -10,8 +10,9 @@ def sf(channel):
     channel.detect_sf()
 
 
-def run(channel, perm_count):
-    channel.run(perm_details=True, perm_count=perm_count)
+def run(channel, perm_count, check_water, check_flip):
+    channel.run(perm_details=True, perm_count=perm_count, 
+                check_water=check_water,check_flip=check_flip)
 
 
 def stats(channel):
@@ -30,6 +31,9 @@ def main():
                         required=True)
     parser.add_argument("--jump", help='count permeation events ' +
                         'by number of jumps', action="store_true")
+    parser.add_argument("--noW", help='ignore water', action="store_true")
+    parser.add_argument("--noFlip", help='do not check oxygem flip', 
+                        action="store_true")
 
     argcomplete.autocomplete(parser)
     args = parser.parse_args()
@@ -52,9 +56,11 @@ def main():
         print()
 
         if args.jump:
-            run(channel, ('cross', 'jump'))
+            run(channel, ('cross', 'jump'), check_water=(not args.noW),
+                check_flip=(not args.noFlip))
         else:
-            run(channel, ('cross'))
+            run(channel, ('cross'), check_water=(not args.noW),
+                check_flip=(not args.noFlip))
 
     elif args.mode == 'stats':
 

@@ -75,7 +75,8 @@ class Channel:
         detect_sf(self.coord)
 
     def run(self, perm_count=("cross"), output="kperm",
-            perm_details=False, sf_diag=False, bs_radius=4.0):
+            perm_details=False, sf_diag=False, bs_radius=4.0, check_flip=True,
+            check_water=True):
         self.results_loc = []
 
         for traj in self.trajs:
@@ -86,7 +87,9 @@ class Channel:
                 perm_details=perm_details,
                 output=output,
                 sf_diag=sf_diag,
-                bs_radius=bs_radius
+                bs_radius=bs_radius,
+                check_flip=check_flip,
+                check_water=check_water
             )
 
             self.results_loc.append(os.path.dirname(traj))
@@ -931,8 +934,15 @@ def run(
     sf_idx=None,
     sf_all_res=False,
     sf_diag=False,
+    check_flip=False,
+    check_water=True,
     bs_radius=4.0,
 ):
+    print("Compute diagonal distance of SF backbone atoms:", sf_diag)
+    print("Check SF oxygen flip:", check_flip)
+    print("Check water occupancy and jump:", check_water)
+    print()
+
     path = os.path.dirname(traj)
 
     log_loc = os.path.abspath(os.path.join(path, output + ".log"))
@@ -975,15 +985,21 @@ def run(
             o_d_diag[ts.frame] = _compute_sf_diagonal(ts.positions, sf_o_idx)
             ca_d_diag[ts.frame] = _compute_sf_diagonal(
                 ts.positions, sf_ca_idx)
-
-        flips[ts.frame] = _check_flip(ts.positions, sf_o_idx)
+            
+        if check_flip:
+            flips[ts.frame] = _check_flip(ts.positions, sf_o_idx)
 
         k_occ = _find_bound(
             ts.positions, k_idx, sf_o_idx, bs_radius=bs_radius
         )
-        w_occ = _find_bound(
-            ts.positions, water_idx, sf_o_idx, bs_radius=bs_radius
-        )
+
+        if check_water:
+            w_occ = _find_bound(
+                ts.positions, water_idx, sf_o_idx, bs_radius=bs_radius
+            )
+        
+        else:
+            w_occ = [[] for _ in range(6)]
 
         k_occupancy.append(k_occ)
         w_occupancy.append(w_occ)
