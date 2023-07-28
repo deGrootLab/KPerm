@@ -1,1 +1,1 @@
-from kperm.channel import Channel, detect_sf
+from kperm.channel import Channel
