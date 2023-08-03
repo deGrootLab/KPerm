@@ -17,8 +17,6 @@
 - `computeStats` renamed to `compute_stats`
 - Charge-scaling tutorial updated
 
-### Changed
-
 ## [0.1.1] - 2023-05-23
 
 ### Changed
